@@ -29,7 +29,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto updateItem(ItemDto itemDto, long itemId, long userId) {
         validateUpdate(itemDto, itemId, userId);
-        return MapperItem.ItemToDto(itemStorage.updateItem(MapperItem.dtoToItem(itemDto, userId)));
+        return MapperItem.itemToDto(itemStorage.updateItem(MapperItem.dtoToItem(itemDto, userId)));
     }
 
     public void validateUpdate(ItemDto itemDto, long itemId, long userId) {
@@ -52,7 +52,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto getItemDto(long itemId) {
-        return MapperItem.ItemToDto(itemStorage.getItem(itemId));
+        return MapperItem.itemToDto(itemStorage.getItem(itemId));
     }
 
     @Override
@@ -60,7 +60,7 @@ public class ItemServiceImpl implements ItemService {
         return itemStorage.getAllItems()
                 .stream()
                 .filter(x -> x.getOwner() == userId)
-                .map(MapperItem::ItemToDto)
+                .map(MapperItem::itemToDto)
                 .collect(Collectors.toList());
     }
 
@@ -73,7 +73,7 @@ public class ItemServiceImpl implements ItemService {
                 .stream()
                 .filter(x -> x.getDescription().toLowerCase().contains(text.toLowerCase()) || x.getName().toLowerCase().contains(text.toLowerCase()))
                 .filter(Item::getAvailable)
-                .map(MapperItem::ItemToDto)
+                .map(MapperItem::itemToDto)
                 .collect(Collectors.toList());
     }
 

@@ -10,13 +10,13 @@ public class ExceptionHandlers {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse ValidationException(ValidationException e) {
+    public ErrorResponse validationException(ValidationException e) {
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse NotFoundException(NotFoundException e) {
+    public ErrorResponse notFoundException(NotFoundException e) {
         return new ErrorResponse(e.getMessage());
     }
 
