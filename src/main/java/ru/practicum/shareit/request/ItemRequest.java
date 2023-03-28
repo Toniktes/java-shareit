@@ -13,9 +13,4 @@ public class ItemRequest {
     private long requestor;
     private Instant created;
 
-    /*id — уникальный идентификатор запроса;
-    description — текст запроса, содержащий описание требуемой вещи;
-    requestor — пользователь, создавший запрос;
-    created — дата и время создания запроса.*/
-
 }

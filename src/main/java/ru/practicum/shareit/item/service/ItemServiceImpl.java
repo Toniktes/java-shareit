@@ -32,7 +32,7 @@ public class ItemServiceImpl implements ItemService {
         return MapperItem.itemToDto(itemStorage.updateItem(MapperItem.dtoToItem(itemDto, userId)));
     }
 
-    public void validateUpdate(ItemDto itemDto, long itemId, long userId) {
+    private void validateUpdate(ItemDto itemDto, long itemId, long userId) {
         if (itemDto.getName() == null) {
             itemDto.setName(getItemDto(itemId).getName());
         }
