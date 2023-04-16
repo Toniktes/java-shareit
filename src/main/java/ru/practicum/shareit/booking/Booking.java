@@ -9,9 +9,9 @@ public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @Column(name = "start")
+    @Column(name = "start_booking")
     Instant start;
-    @Column(name = "end")
+    @Column(name = "end_booking")
     Instant end;
     @Column(name = "item", nullable = false)
     long item;

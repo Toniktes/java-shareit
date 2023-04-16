@@ -1,12 +1,16 @@
-package ru.practicum.shareit.user.model;
+package ru.practicum.shareit.user;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
 @Data
+@AllArgsConstructor
+@RequiredArgsConstructor
 @Entity
 @Table(name = "users")
 public class User {
@@ -15,6 +19,6 @@ public class User {
     private long id;
     @Column(name = "name", nullable = false)
     private String name;
-    @Column(name = "email",nullable = false ,length = 512)
+    @Column(name = "email",nullable = false ,length = 512, unique = true)
     private String email;
 }

@@ -14,7 +14,7 @@ public class MapperItem {
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
                 userId,
-                null);
+                0);
     }
 
     public static ItemDto itemToDto(Item item) {
