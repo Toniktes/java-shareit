@@ -3,17 +3,13 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.MapperUser;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import javax.persistence.EntityNotFoundException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -27,6 +23,12 @@ public class UserServiceImpl implements UserService {
         validate(userDto);
         User user = userRepository.save(MapperUser.dtoToUser(userDto));
         return MapperUser.UserToDto(user);
+    }
+
+    private void validate(UserDto userDto) {
+        if (userDto.getEmail() == null || userDto.getEmail().isBlank() || !userDto.getEmail().contains("@")) {
+            throw new ValidationException("Email can't be empty and must contains @");
+        }
     }
 
     @Transactional
@@ -65,12 +67,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(long id) {
         userRepository.deleteById(id);
-    }
-
-    private void validate(UserDto userDto) {
-        if (userDto.getEmail() == null || userDto.getEmail().isBlank() || !userDto.getEmail().contains("@")) {
-            throw new ValidationException("Email can't be empty and must contains @");
-        }
     }
 
 }
