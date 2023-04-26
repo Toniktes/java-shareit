@@ -5,9 +5,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.mapper.MapperItem;
 import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
+import ru.practicum.shareit.item.mapper.MapperItem;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -74,6 +75,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional(readOnly = true)
     @Override
+    public ItemDtoWithBooking getItemDtoWithBooking(long itemId, long userId) {
+         itemRepository.getById(itemId);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
     public List<ItemDto> getListOfThings(long userId) {
         return itemRepository.findAll()
                 .stream()
@@ -95,5 +102,12 @@ public class ItemServiceImpl implements ItemService {
                 .map(MapperItem::itemToDto)
                 .collect(Collectors.toList());
     }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Item getItem(long itemId) {
+        return itemRepository.getById(itemId);
+    }
+
 
 }

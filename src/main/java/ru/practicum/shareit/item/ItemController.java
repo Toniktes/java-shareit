@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.List;
@@ -31,6 +32,12 @@ public class ItemController {
     public ItemDto getItemInfo(@PathVariable("itemId") long itemId) {
         log.debug("received a request to get info for itemId: {}", itemId);
         return itemService.getItemDto(itemId);
+    }
+
+    @GetMapping("/{itemId}")
+    public ItemDtoWithBooking getItemInfo(@PathVariable("itemId") long itemId, @RequestHeader("X-Sharer-User-Id") long userId) {
+        log.debug("received a request to get info for itemId: {}", itemId);
+        return itemService.getItemDtoWithBooking(itemId, userId);
     }
 
     @GetMapping

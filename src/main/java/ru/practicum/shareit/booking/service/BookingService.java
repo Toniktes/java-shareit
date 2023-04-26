@@ -2,13 +2,22 @@ package ru.practicum.shareit.booking.service;
 
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.BookingState;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingDtoResponse;
+
+import java.util.List;
 
 public interface BookingService {
-    void addBooking(Booking booking, long userId);
+    BookingDtoResponse addBooking(BookingDto bookingDto, long userId);
 
-    @Transactional
-    void processTheRequest(long userId, long bookingId, boolean approved);
+    BookingDtoResponse processTheRequest(long userId, long bookingId, String approved);
 
-    @Transactional(readOnly = true)
-    Booking getBooking(long id);
+    BookingDtoResponse getBooking(long bookingId, long userId);
+
+    Booking getBooking(long bookingId);
+
+    List<BookingDtoResponse> getBookingListByUser(String state, long userId);
+
+    List<BookingDtoResponse> getBookingListForThingsUser(String state, long userId);
 }
