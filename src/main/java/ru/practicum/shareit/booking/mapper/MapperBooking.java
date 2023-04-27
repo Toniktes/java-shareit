@@ -34,7 +34,7 @@ public class MapperBooking {
                 booking.getId(),
                 booking.getStart(),
                 booking.getEnd(),
-                userRepository.findByNameAndId(userRepository.getById(booking.getBooker()).getName(), booking.getBooker()),
+                userRepository.findByNameAndId(userRepository.getById(booking.getBookerId()).getName(), booking.getBookerId()),
                 itemRepository.findByName(item.getName()),
                 booking.getStatus()
         );

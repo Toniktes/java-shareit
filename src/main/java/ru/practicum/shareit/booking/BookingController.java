@@ -27,8 +27,8 @@ public class BookingController {
 
     @PatchMapping("/{bookingId}")
     public BookingDtoResponse processTheRequest(@RequestHeader("X-Sharer-User-Id") long userId,
-                                  @PathVariable("bookingId") long bookingId,
-                                  @RequestParam String approved) {
+                                                @PathVariable("bookingId") long bookingId,
+                                                @RequestParam String approved) {
         log.debug("received a request to processTheRequest");
         return bookingService.processTheRequest(userId, bookingId, approved);
     }
@@ -41,14 +41,14 @@ public class BookingController {
 
     @GetMapping
     public List<BookingDtoResponse> getBookingListByUser(@RequestParam(required = false, defaultValue = "ALL") String state,
-                                              @RequestHeader("X-Sharer-User-Id") long userId) {
+                                                         @RequestHeader("X-Sharer-User-Id") long userId) {
         log.debug("received a request to getBookingList");
         return bookingService.getBookingListByUser(state, userId);
     }
 
     @GetMapping("/owner")
     public List<BookingDtoResponse> getBookingListForThingsUser(@RequestParam(required = false, defaultValue = "ALL") String state,
-                                                     @RequestHeader("X-Sharer-User-Id") long userId) {
+                                                                @RequestHeader("X-Sharer-User-Id") long userId) {
         return bookingService.getBookingListForThingsUser(state, userId);
     }
 

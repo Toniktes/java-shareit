@@ -28,11 +28,11 @@ public class ItemController {
         return itemService.updateItem(itemDto, itemId, userId);
     }
 
-    @GetMapping("/{itemId}")
+   /* @GetMapping("/{itemId}")
     public ItemDto getItemInfo(@PathVariable("itemId") long itemId) {
         log.debug("received a request to get info for itemId: {}", itemId);
         return itemService.getItemDto(itemId);
-    }
+    }*/
 
     @GetMapping("/{itemId}")
     public ItemDtoWithBooking getItemInfo(@PathVariable("itemId") long itemId, @RequestHeader("X-Sharer-User-Id") long userId) {
@@ -41,7 +41,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getListOfThings(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public List<ItemDtoWithBooking> getListOfThings(@RequestHeader("X-Sharer-User-Id") long userId) {
         log.debug("received a request to get list of things for userId: {}", userId);
         return itemService.getListOfThings(userId);
 

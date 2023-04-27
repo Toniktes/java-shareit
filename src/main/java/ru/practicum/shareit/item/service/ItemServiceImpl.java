@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserService userService;
+    private final MapperItem mapperItem;
 
     @Transactional
     @Override
@@ -76,17 +77,22 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(readOnly = true)
     @Override
     public ItemDtoWithBooking getItemDtoWithBooking(long itemId, long userId) {
-         itemRepository.getById(itemId);
+        ItemDtoWithBooking item = mapperItem.itemToDtoWithBooking(itemRepository.getById(itemId));
+        if (itemRepository.getById(itemId).getOwner() != userId) {
+            item.setLastBooking(null);
+            item.setNextBooking(null);
+        }
+        return item;
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemDto> getListOfThings(long userId) {
-        return itemRepository.findAll()
+    public List<ItemDtoWithBooking> getListOfThings(long userId) {
+        return itemRepository.findAllByOwner(userId)
                 .stream()
-                .filter(x -> x.getOwner() == userId)
-                .map(MapperItem::itemToDto)
+                .map(mapperItem::itemToDtoWithBooking)
                 .collect(Collectors.toList());
+
     }
 
     @Transactional(readOnly = true)

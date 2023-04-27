@@ -21,7 +21,7 @@ public class Booking {
     @Column(name = "end_booking", nullable = false)
     LocalDateTime end;
     @Column(name = "booker_id", nullable = false)
-    long booker;
+    long bookerId;
     @Column(name = "item_id", nullable = false)
     long itemId;
     @Enumerated(EnumType.STRING)

@@ -12,7 +12,7 @@ import ru.practicum.shareit.booking.mapper.MapperBooking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -72,8 +72,8 @@ public class BookingServiceImpl implements BookingService {
             } else {
                 booking.setStatus(BookingStatus.REJECTED);
             }
-            if (booking.getBooker() == 0) {
-                booking.setBooker(bookingId);
+            if (booking.getBookerId() == 0) {
+                booking.setBookerId(bookingId);
             }
             return mapperBooking.bookingToDtoResponse(bookingRepository.save(booking),
                     itemService.getItem(booking.getItemId()));
@@ -88,7 +88,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDtoResponse getBooking(long bookingId, long userId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("not found booking with id: " + bookingId));
-        if (booking.getBooker() == userId || itemService.getItem(booking.getItemId()).getOwner() == userId) {
+        if (booking.getBookerId() == userId || itemService.getItem(booking.getItemId()).getOwner() == userId) {
             return mapperBooking.bookingToDtoResponse(booking, itemService.getItem(booking.getItemId()));
         } else {
             throw new NotFoundException("It can be performed either by the booking author or by the owner of the item");
@@ -109,15 +109,29 @@ public class BookingServiceImpl implements BookingService {
             BookingState resultState = Enum.valueOf(BookingState.class, state);
             switch (resultState) {
                 case ALL:
-                    return bookingRepository.findAllByBooker(userId)
+                    return bookingRepository.findAllByBookerId(userId)
                             .stream()
                             .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
                             .sorted(Comparator.comparing(BookingDtoResponse::getStart).reversed())
                             .collect(Collectors.toList());
                 case FUTURE:
-                    return bookingRepository.findAllByBooker(userId)
+                    return bookingRepository.findAllByBookerId(userId)
                             .stream()
                             .filter(x -> x.getStatus() == BookingStatus.WAITING || x.getStatus() == BookingStatus.APPROVED)
+                            .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
+                            .sorted(Comparator.comparing(BookingDtoResponse::getStart).reversed())
+                            .collect(Collectors.toList());
+                case WAITING:
+                    return bookingRepository.findAllByBookerId(userId)
+                            .stream()
+                            .filter(x -> x.getStatus() == BookingStatus.WAITING)
+                            .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
+                            .sorted(Comparator.comparing(BookingDtoResponse::getStart).reversed())
+                            .collect(Collectors.toList());
+                case REJECTED:
+                    return bookingRepository.findAllByBookerId(userId)
+                            .stream()
+                            .filter(x -> x.getStatus() == BookingStatus.REJECTED)
                             .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
                             .sorted(Comparator.comparing(BookingDtoResponse::getStart).reversed())
                             .collect(Collectors.toList());
@@ -136,14 +150,13 @@ public class BookingServiceImpl implements BookingService {
         try {
             BookingState resultState = Enum.valueOf(BookingState.class, state);
             List<Long> list;
-            List<Booking> bookings;
+            List<Booking> bookings = new ArrayList<>();
             switch (resultState) {
                 case ALL:
                     list = itemService.getListOfThings(userId)
                             .stream()
-                            .map(ItemDto::getId)
+                            .map(ItemDtoWithBooking::getId)
                             .collect(Collectors.toList());
-                    bookings = new ArrayList<>();
                     for (Long ids : list) {
                         bookings.addAll(bookingRepository.findAllByItemId(ids));
                     }
@@ -154,14 +167,39 @@ public class BookingServiceImpl implements BookingService {
                 case FUTURE:
                     list = itemService.getListOfThings(userId)
                             .stream()
-                            .map(ItemDto::getId)
+                            .map(ItemDtoWithBooking::getId)
                             .collect(Collectors.toList());
-                    bookings = new ArrayList<>();
                     for (Long ids : list) {
                         bookings.addAll(bookingRepository.findAllByItemId(ids));
                     }
                     return bookings.stream()
                             .filter(x -> x.getStatus() == BookingStatus.WAITING || x.getStatus() == BookingStatus.APPROVED)
+                            .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
+                            .sorted(Comparator.comparing(BookingDtoResponse::getStart).reversed())
+                            .collect(Collectors.toList());
+                case WAITING:
+                    list = itemService.getListOfThings(userId)
+                            .stream()
+                            .map(ItemDtoWithBooking::getId)
+                            .collect(Collectors.toList());
+                    for (Long ids : list) {
+                        bookings.addAll(bookingRepository.findAllByItemId(ids));
+                    }
+                    return bookings.stream()
+                            .filter(x -> x.getStatus() == BookingStatus.WAITING)
+                            .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
+                            .sorted(Comparator.comparing(BookingDtoResponse::getStart).reversed())
+                            .collect(Collectors.toList());
+                case REJECTED:
+                    list = itemService.getListOfThings(userId)
+                            .stream()
+                            .map(ItemDtoWithBooking::getId)
+                            .collect(Collectors.toList());
+                    for (Long ids : list) {
+                        bookings.addAll(bookingRepository.findAllByItemId(ids));
+                    }
+                    return bookings.stream()
+                            .filter(x -> x.getStatus() == BookingStatus.REJECTED)
                             .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
                             .sorted(Comparator.comparing(BookingDtoResponse::getStart).reversed())
                             .collect(Collectors.toList());

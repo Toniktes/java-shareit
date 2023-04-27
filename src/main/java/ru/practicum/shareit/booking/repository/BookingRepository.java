@@ -5,10 +5,16 @@ import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.dto.LastBooking;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    List<Booking> findAllByBooker(long booker);
+    List<Booking> findAllByBookerId(long booker);
+
     List<Booking> findAllByItemId(long itemId);
-    LastBooking findByBooker(long booker);
+
+    //LastBooking findByBooker(long booker);
+
+    LastBooking getByIdAndItemId(long id, long itemId);
+
 
 }
