@@ -3,15 +3,21 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.item.Comment;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import ru.practicum.shareit.item.mapper.MapperItem;
+import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +27,8 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserService userService;
     private final MapperItem mapperItem;
+    private final CommentRepository commentRepository;
+    private final BookingRepository bookingRepository;
 
     @Transactional
     @Override
@@ -92,7 +100,6 @@ public class ItemServiceImpl implements ItemService {
                 .stream()
                 .map(mapperItem::itemToDtoWithBooking)
                 .collect(Collectors.toList());
-
     }
 
     @Transactional(readOnly = true)
@@ -103,7 +110,8 @@ public class ItemServiceImpl implements ItemService {
         }
         return itemRepository.findAll()
                 .stream()
-                .filter(x -> x.getDescription().toLowerCase().contains(text.toLowerCase()) || x.getName().toLowerCase().contains(text.toLowerCase()))
+                .filter(x -> x.getDescription().toLowerCase().contains(text.toLowerCase()) ||
+                        x.getName().toLowerCase().contains(text.toLowerCase()))
                 .filter(Item::getAvailable)
                 .map(MapperItem::itemToDto)
                 .collect(Collectors.toList());
@@ -115,5 +123,27 @@ public class ItemServiceImpl implements ItemService {
         return itemRepository.getById(itemId);
     }
 
+    @Transactional
+    @Override
+    public Comment addComment(Comment comment, long userId, long itemId) {
+        if (bookingRepository.findByItemIdAndBookerIdAndStatus(itemId, userId, BookingStatus.APPROVED).isEmpty()) {
+            throw new ValidationException("you can make a comment only by renting");
+        }
+        if (comment.getText().isBlank()) {
+            throw new ValidationException("comment can't be is Empty");
+        }
+        List<LocalDateTime> times = bookingRepository.findByItemIdAndBookerIdAndStatus(itemId, userId, BookingStatus.APPROVED)
+                .stream()
+                .map(Booking::getEnd)
+                .filter(x -> x.isBefore(LocalDateTime.now()))
+                .collect(Collectors.toList());
+        if (times.isEmpty()) {
+            throw new ValidationException("can't add a review for a future booking");
+        }
+        comment.setAuthorName(userService.getUser(userId).getName());
+        comment.setItem(itemId);
+        comment.setCreated(LocalDateTime.now());
+        return commentRepository.save(comment);
+    }
 
 }

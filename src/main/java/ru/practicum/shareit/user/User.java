@@ -5,8 +5,6 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
 
 @Data
 @AllArgsConstructor
@@ -19,6 +17,6 @@ public class User {
     private long id;
     @Column(name = "name", nullable = false)
     private String name;
-    @Column(name = "email",nullable = false ,length = 512, unique = true)
+    @Column(name = "email", nullable = false, length = 512, unique = true)
     private String email;
 }

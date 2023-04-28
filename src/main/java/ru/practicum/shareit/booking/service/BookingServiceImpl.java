@@ -17,10 +17,12 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @RequiredArgsConstructor
@@ -107,40 +109,47 @@ public class BookingServiceImpl implements BookingService {
         validateUser(userId);
         try {
             BookingState resultState = Enum.valueOf(BookingState.class, state);
+            Stream<BookingDtoResponse> result;
             switch (resultState) {
                 case ALL:
-                    return bookingRepository.findAllByBookerId(userId)
-                            .stream()
-                            .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
-                            .sorted(Comparator.comparing(BookingDtoResponse::getStart).reversed())
-                            .collect(Collectors.toList());
+                    return mapAndSorted(bookingRepository.findAllByBookerId(userId)
+                            .stream());
                 case FUTURE:
-                    return bookingRepository.findAllByBookerId(userId)
+                    return mapAndSorted(bookingRepository.findAllByBookerId(userId)
                             .stream()
-                            .filter(x -> x.getStatus() == BookingStatus.WAITING || x.getStatus() == BookingStatus.APPROVED)
-                            .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
-                            .sorted(Comparator.comparing(BookingDtoResponse::getStart).reversed())
-                            .collect(Collectors.toList());
+                            .filter(x -> x.getStatus() == BookingStatus.WAITING || x.getStatus() == BookingStatus.APPROVED));
                 case WAITING:
-                    return bookingRepository.findAllByBookerId(userId)
+                    return mapAndSorted(bookingRepository.findAllByBookerId(userId)
                             .stream()
-                            .filter(x -> x.getStatus() == BookingStatus.WAITING)
-                            .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
-                            .sorted(Comparator.comparing(BookingDtoResponse::getStart).reversed())
-                            .collect(Collectors.toList());
+                            .filter(x -> x.getStatus() == BookingStatus.WAITING));
+
                 case REJECTED:
-                    return bookingRepository.findAllByBookerId(userId)
+                    return mapAndSorted(bookingRepository.findAllByBookerId(userId)
                             .stream()
-                            .filter(x -> x.getStatus() == BookingStatus.REJECTED)
-                            .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
-                            .sorted(Comparator.comparing(BookingDtoResponse::getStart).reversed())
-                            .collect(Collectors.toList());
+                            .filter(x -> x.getStatus() == BookingStatus.REJECTED));
+                case CURRENT:
+                    return mapAndSorted(bookingRepository.findAllByBookerId(userId)
+                            .stream()
+                            .filter(x -> x.getStatus() == BookingStatus.REJECTED || x.getStatus() == BookingStatus.APPROVED)
+                            .filter(x -> x.getEnd().isAfter(LocalDateTime.now()) && x.getStart().isBefore(LocalDateTime.now())));
+                case PAST:
+                    return mapAndSorted(bookingRepository.findAllByBookerId(userId)
+                            .stream()
+                            .filter(x -> x.getStatus() == BookingStatus.APPROVED)
+                            .filter(x -> x.getEnd().isBefore(LocalDateTime.now()) && x.getStart().isBefore(LocalDateTime.now())));
                 default:
                     throw new ValidationException("Unknown state: UNSUPPORTED_STATUS");
             }
         } catch (RuntimeException e) {
             throw new ValidationException("Unknown state: UNSUPPORTED_STATUS");
         }
+    }
+
+    private List<BookingDtoResponse> mapAndSorted(Stream<Booking> stream) {
+        return stream
+                .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
+                .sorted(Comparator.comparing(BookingDtoResponse::getEnd).reversed())
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -153,62 +162,71 @@ public class BookingServiceImpl implements BookingService {
             List<Booking> bookings = new ArrayList<>();
             switch (resultState) {
                 case ALL:
-                    list = itemService.getListOfThings(userId)
-                            .stream()
-                            .map(ItemDtoWithBooking::getId)
-                            .collect(Collectors.toList());
+                    list = getListItemIdForUser(userId);
                     for (Long ids : list) {
                         bookings.addAll(bookingRepository.findAllByItemId(ids));
                     }
-                    return bookings.stream()
-                            .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
-                            .sorted(Comparator.comparing(BookingDtoResponse::getStart).reversed())
-                            .collect(Collectors.toList());
+                    return mapAndSortedWithStart(bookings
+                            .stream());
                 case FUTURE:
-                    list = itemService.getListOfThings(userId)
-                            .stream()
-                            .map(ItemDtoWithBooking::getId)
-                            .collect(Collectors.toList());
+                    list = getListItemIdForUser(userId);
                     for (Long ids : list) {
                         bookings.addAll(bookingRepository.findAllByItemId(ids));
                     }
-                    return bookings.stream()
-                            .filter(x -> x.getStatus() == BookingStatus.WAITING || x.getStatus() == BookingStatus.APPROVED)
-                            .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
-                            .sorted(Comparator.comparing(BookingDtoResponse::getStart).reversed())
-                            .collect(Collectors.toList());
+                    return mapAndSortedWithStart(bookings
+                            .stream()
+                            .filter(x -> x.getStatus() == BookingStatus.WAITING
+                                    || x.getStatus() == BookingStatus.APPROVED));
                 case WAITING:
-                    list = itemService.getListOfThings(userId)
-                            .stream()
-                            .map(ItemDtoWithBooking::getId)
-                            .collect(Collectors.toList());
+                    list = getListItemIdForUser(userId);
                     for (Long ids : list) {
                         bookings.addAll(bookingRepository.findAllByItemId(ids));
                     }
-                    return bookings.stream()
-                            .filter(x -> x.getStatus() == BookingStatus.WAITING)
-                            .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
-                            .sorted(Comparator.comparing(BookingDtoResponse::getStart).reversed())
-                            .collect(Collectors.toList());
+                    return mapAndSortedWithStart(bookings.stream()
+                            .filter(x -> x.getStatus() == BookingStatus.WAITING));
                 case REJECTED:
-                    list = itemService.getListOfThings(userId)
-                            .stream()
-                            .map(ItemDtoWithBooking::getId)
-                            .collect(Collectors.toList());
+                    list = getListItemIdForUser(userId);
                     for (Long ids : list) {
                         bookings.addAll(bookingRepository.findAllByItemId(ids));
                     }
-                    return bookings.stream()
-                            .filter(x -> x.getStatus() == BookingStatus.REJECTED)
-                            .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
-                            .sorted(Comparator.comparing(BookingDtoResponse::getStart).reversed())
-                            .collect(Collectors.toList());
+                    return mapAndSortedWithStart(bookings.stream()
+                            .filter(x -> x.getStatus() == BookingStatus.REJECTED));
+                case CURRENT:
+                    list = getListItemIdForUser(userId);
+                    for (Long ids : list) {
+                        bookings.addAll(bookingRepository.findAllByItemId(ids));
+                    }
+                    return mapAndSortedWithStart(bookings.stream()
+                            .filter(x -> x.getStatus() == BookingStatus.REJECTED || x.getStatus() == BookingStatus.APPROVED)
+                            .filter(x -> x.getEnd().isAfter(LocalDateTime.now()) && x.getStart().isBefore(LocalDateTime.now())));
+                case PAST:
+                    list = getListItemIdForUser(userId);
+                    for (Long ids : list) {
+                        bookings.addAll(bookingRepository.findAllByItemId(ids));
+                    }
+                    return mapAndSortedWithStart(bookings.stream()
+                            .filter(x -> x.getStatus() == BookingStatus.APPROVED)
+                            .filter(x -> x.getEnd().isBefore(LocalDateTime.now()) && x.getStart().isBefore(LocalDateTime.now())));
                 default:
                     throw new ValidationException("Unknown state: UNSUPPORTED_STATUS");
             }
         } catch (RuntimeException e) {
             throw new ValidationException("Unknown state: UNSUPPORTED_STATUS");
         }
+    }
+
+    private List<Long> getListItemIdForUser(long userId) {
+        return itemService.getListOfThings(userId)
+                .stream()
+                .map(ItemDtoWithBooking::getId)
+                .collect(Collectors.toList());
+    }
+
+    private List<BookingDtoResponse> mapAndSortedWithStart(Stream<Booking> stream) {
+        return stream
+                .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
+                .sorted(Comparator.comparing(BookingDtoResponse::getStart).reversed())
+                .collect(Collectors.toList());
     }
 
     private void validateUser(long userId) {

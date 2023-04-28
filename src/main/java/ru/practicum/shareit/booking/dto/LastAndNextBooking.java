@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.dto;
 
-public interface LastBooking {
+public interface LastAndNextBooking {
     long getId();
+
     long getBookerId();
 }

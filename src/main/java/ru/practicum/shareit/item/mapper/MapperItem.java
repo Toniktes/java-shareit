@@ -2,22 +2,23 @@ package ru.practicum.shareit.item.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.dto.LastBooking;
+import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.dto.LastAndNextBooking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
+import ru.practicum.shareit.item.repository.CommentRepository;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
-import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
 public class MapperItem {
 
     private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
 
     public static Item dtoToItem(ItemDto itemDto, long userId) {
         return new Item(
@@ -39,20 +40,23 @@ public class MapperItem {
     }
 
     public ItemDtoWithBooking itemToDtoWithBooking(Item item) {
-        LastBooking lastBooking;
-        LastBooking nextBooking;
+        LastAndNextBooking lastBooking;
+        LastAndNextBooking nextBooking;
+
         try {
-            lastBooking = bookingRepository.getByIdAndItemId(((bookingRepository.findAllByItemId(item.getId())
-                    .stream()
-                    .filter(x -> x.getEnd().isBefore(LocalDateTime.now()))
-                    .min(Comparator.comparing(x -> x.getEnd().getSecond()))).get().getId()
-            ), item.getId());
+            lastBooking = bookingRepository.getByIdAndItemId((bookingRepository.findAllByItemIdAndStatus(item.getId(),
+                                    BookingStatus.APPROVED)
+                            .stream()
+                            .filter(x -> x.getStart().isBefore(LocalDateTime.now()))
+                            .max(Comparator.comparing(x -> x.getStart().getSecond())).get().getId())
+                    , item.getId());
         } catch (RuntimeException e) {
             lastBooking = null;
         }
 
         try {
-            nextBooking = bookingRepository.getByIdAndItemId(((bookingRepository.findAllByItemId(item.getId())
+            nextBooking = bookingRepository.getByIdAndItemId(((bookingRepository.findAllByItemIdAndStatus(item.getId(),
+                            BookingStatus.APPROVED)
                     .stream()
                     .filter(x -> x.getStart().isAfter(LocalDateTime.now()))
                     .max(Comparator.comparing(x -> x.getStart().getSecond())).get().getId())
@@ -67,6 +71,9 @@ public class MapperItem {
                 item.getDescription(),
                 item.getAvailable(),
                 lastBooking,
-                nextBooking);
+                nextBooking,
+                commentRepository.findByItem(item.getId())
+        );
+
     }
 }

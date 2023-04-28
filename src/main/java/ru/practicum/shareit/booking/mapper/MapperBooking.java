@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoResponse;
-import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -15,7 +14,6 @@ import ru.practicum.shareit.user.repository.UserRepository;
 public class MapperBooking {
 
     private final ItemRepository itemRepository;
-    private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
 
     public static Booking dtoToBooking(BookingDto bookingDto) {
