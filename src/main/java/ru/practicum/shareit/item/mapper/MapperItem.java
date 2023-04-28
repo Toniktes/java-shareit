@@ -48,8 +48,8 @@ public class MapperItem {
                                     BookingStatus.APPROVED)
                             .stream()
                             .filter(x -> x.getStart().isBefore(LocalDateTime.now()))
-                            .max(Comparator.comparing(x -> x.getStart().getSecond())).get().getId())
-                    , item.getId());
+                            .max(Comparator.comparing(x -> x.getStart().getSecond())).get().getId()),
+                    item.getId());
         } catch (RuntimeException e) {
             lastBooking = null;
         }

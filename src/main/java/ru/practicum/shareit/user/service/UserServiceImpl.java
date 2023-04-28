@@ -22,7 +22,7 @@ public class UserServiceImpl implements UserService {
     public UserDto addUser(UserDto userDto) {
         validate(userDto);
         User user = userRepository.save(MapperUser.dtoToUser(userDto));
-        return MapperUser.UserToDto(user);
+        return MapperUser.userToDto(user);
     }
 
     private void validate(UserDto userDto) {
@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
     public UserDto updateUser(UserDto userDto) {
         validateUpdate(userDto);
         User user = userRepository.save(MapperUser.dtoToUser(userDto));
-        return MapperUser.UserToDto(user);
+        return MapperUser.userToDto(user);
     }
 
     private void validateUpdate(UserDto userDto) {
@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     @Override
     public UserDto getUser(long id) {
-        return MapperUser.UserToDto(userRepository.getById(id));
+        return MapperUser.userToDto(userRepository.getById(id));
     }
 
     @Transactional(readOnly = true)
@@ -59,7 +59,7 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> getAllUsers() {
         return userRepository.findAll()
                 .stream()
-                .map(MapperUser::UserToDto)
+                .map(MapperUser::userToDto)
                 .collect(Collectors.toList());
     }
 

@@ -12,7 +12,7 @@ public class MapperUser {
         );
     }
 
-    public static UserDto UserToDto(User user) {
+    public static UserDto userToDto(User user) {
         return new UserDto(
                 user.getId(),
                 user.getName(),
