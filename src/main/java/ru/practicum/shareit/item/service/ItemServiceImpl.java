@@ -30,7 +30,6 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
 
-    @Transactional
     @Override
     public ItemDto addItem(ItemDto itemDto, long userId) {
         validate(itemDto, userId);
@@ -123,7 +122,6 @@ public class ItemServiceImpl implements ItemService {
         return itemRepository.getById(itemId);
     }
 
-    @Transactional
     @Override
     public Comment addComment(Comment comment, long userId, long itemId) {
         if (bookingRepository.findByItemIdAndBookerIdAndStatus(itemId, userId, BookingStatus.APPROVED).isEmpty()) {

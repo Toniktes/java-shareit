@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.dto.LastAndNextBooking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -12,6 +13,7 @@ import ru.practicum.shareit.item.repository.CommentRepository;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -40,31 +42,30 @@ public class MapperItem {
     }
 
     public ItemDtoWithBooking itemToDtoWithBooking(Item item) {
-        LastAndNextBooking lastBooking;
-        LastAndNextBooking nextBooking;
+        LastAndNextBooking lastBooking = null;
+        LastAndNextBooking nextBooking = null;
+        Optional<Booking> idLast = Optional.empty();
+        Optional<Booking> idNext = Optional.empty();
 
-        try {
-            lastBooking = bookingRepository.getByIdAndItemId((bookingRepository.findAllByItemIdAndStatus(item.getId(),
-                                    BookingStatus.APPROVED)
-                            .stream()
-                            .filter(x -> x.getStart().isBefore(LocalDateTime.now()))
-                            .max(Comparator.comparing(x -> x.getStart().getSecond())).get().getId()),
-                    item.getId());
-        } catch (RuntimeException e) {
-            lastBooking = null;
+        if (!bookingRepository.findAllByItemId(item.getId()).isEmpty()) {
+            if (!bookingRepository.findAllByItemIdAndStatus(item.getId(),
+                    BookingStatus.APPROVED).isEmpty()) {
+                idLast = bookingRepository.findAllByItemIdAndStatus(item.getId(),
+                                BookingStatus.APPROVED)
+                        .stream()
+                        .filter(x -> x.getStart().isBefore(LocalDateTime.now()))
+                        .max(Comparator.comparing(x -> x.getStart().getSecond()));
+                idNext = bookingRepository.findAllByItemIdAndStatus(item.getId(),
+                                BookingStatus.APPROVED)
+                        .stream()
+                        .filter(x -> x.getStart().isAfter(LocalDateTime.now()))
+                        .max(Comparator.comparing(x -> x.getStart().getSecond()));
+            }
+            lastBooking = idLast.map(booking -> bookingRepository.getByIdAndItemId(booking.getId(), item.getId()))
+                    .orElse(null);
+            nextBooking = idNext.map(booking -> bookingRepository.getByIdAndItemId(booking.getId(), item.getId()))
+                    .orElse(null);
         }
-
-        try {
-            nextBooking = bookingRepository.getByIdAndItemId(((bookingRepository.findAllByItemIdAndStatus(item.getId(),
-                            BookingStatus.APPROVED)
-                    .stream()
-                    .filter(x -> x.getStart().isAfter(LocalDateTime.now()))
-                    .max(Comparator.comparing(x -> x.getStart().getSecond())).get().getId())
-            ), item.getId());
-        } catch (RuntimeException e) {
-            nextBooking = null;
-        }
-
         return new ItemDtoWithBooking(
                 item.getId(),
                 item.getName(),

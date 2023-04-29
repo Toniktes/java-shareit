@@ -12,7 +12,7 @@ import ru.practicum.shareit.booking.mapper.MapperBooking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
+import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -35,7 +35,6 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final MapperBooking mapperBooking;
 
-    @Transactional
     @Override
     public BookingDtoResponse addBooking(BookingDto bookingDto, long userId) {
         validateBooking(bookingDto, userId);
@@ -216,9 +215,9 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private List<Long> getListItemIdForUser(long userId) {
-        return itemService.getListOfThings(userId)
+        return itemRepository.findAllByOwner(userId)
                 .stream()
-                .map(ItemDtoWithBooking::getId)
+                .map(Item::getId)
                 .collect(Collectors.toList());
     }
 

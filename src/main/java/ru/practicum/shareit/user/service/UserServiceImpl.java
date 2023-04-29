@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
-    @Transactional
     @Override
     public UserDto addUser(UserDto userDto) {
         validate(userDto);
