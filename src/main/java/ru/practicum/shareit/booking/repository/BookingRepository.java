@@ -18,18 +18,16 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByItemIdAndBookerIdAndStatus(long itemId, long bookerId, BookingStatus status);
 
-    List<Booking> findAllByItemIdAndStatus(long itemId, BookingStatus status);
-
-    @Query(value = "select bk.id " +
-            "from Booking as bk " +
-            "where bk.item_Id = ?1 AND bk.start_booking < CURRENT_TIMESTAMP AND bk.status = 'APPROVED' " +
-            "ORDER BY bk.start_booking " +
+    @Query(value = "SELECT bk.id, bk.start_booking, bk.end_booking, bk.booker_id, bk.item_id, bk.status " +
+            "FROM Booking AS bk " +
+            "WHERE bk.item_Id = ?1 AND bk.start_booking < CURRENT_TIMESTAMP AND bk.status = 'APPROVED' " +
+            "ORDER BY bk.start_booking DESC " +
             "LIMIT 1 ", nativeQuery = true)
     Optional<Booking> getLast(long itemId);
 
-    @Query(value = "select bk.id " +
-            "from Booking as bk " +
-            "where bk.item_Id = ?1 AND bk.start_booking > CURRENT_TIMESTAMP AND bk.status = 'APPROVED' " +
+    @Query(value = "SELECT bk.id, bk.start_booking, bk.end_booking, bk.booker_id, bk.item_id, bk.status " +
+            "FROM Booking AS bk " +
+            "WHERE bk.item_Id = ?1 AND bk.start_booking > CURRENT_TIMESTAMP AND bk.status = 'APPROVED' " +
             "ORDER BY bk.start_booking " +
             "LIMIT 1 ", nativeQuery = true)
     Optional<Booking> getNext(long itemId);
