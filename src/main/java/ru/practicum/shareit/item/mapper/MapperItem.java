@@ -11,6 +11,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 import ru.practicum.shareit.item.repository.CommentRepository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Optional;
@@ -50,16 +51,9 @@ public class MapperItem {
         if (!bookingRepository.findAllByItemId(item.getId()).isEmpty()) {
             if (!bookingRepository.findAllByItemIdAndStatus(item.getId(),
                     BookingStatus.APPROVED).isEmpty()) {
-                idLast = bookingRepository.findAllByItemIdAndStatus(item.getId(),
-                                BookingStatus.APPROVED)
-                        .stream()
-                        .filter(x -> x.getStart().isBefore(LocalDateTime.now()))
-                        .max(Comparator.comparing(x -> x.getStart().getSecond()));
-                idNext = bookingRepository.findAllByItemIdAndStatus(item.getId(),
-                                BookingStatus.APPROVED)
-                        .stream()
-                        .filter(x -> x.getStart().isAfter(LocalDateTime.now()))
-                        .max(Comparator.comparing(x -> x.getStart().getSecond()));
+                idLast = bookingRepository.getLast(item.getId());
+                idNext = bookingRepository.getNext(item.getId());
+
             }
             lastBooking = idLast.map(booking -> bookingRepository.getByIdAndItemId(booking.getId(), item.getId()))
                     .orElse(null);
