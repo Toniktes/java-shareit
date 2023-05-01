@@ -2,80 +2,70 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.stotage.UserStorage;
+import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.MapperUser;
+import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
-    private int generateId = 0;
-    private final UserStorage userStorage;
-    private final List<String> emails = new ArrayList<>();
+    private final UserRepository userRepository;
 
     @Override
-    public User addUser(User user) {
-        validate(user);
-        emails.add(user.getEmail());
-        return userStorage.addUser(user);
+    public UserDto addUser(UserDto userDto) {
+        validate(userDto);
+        User user = userRepository.save(MapperUser.dtoToUser(userDto));
+        return MapperUser.userToDto(user);
     }
 
-    @Override
-    public User updateUser(User user) {
-        validateUpdate(user);
-        emails.add(user.getEmail());
-        return userStorage.updateUser(user);
-    }
-
-    private void validateUpdate(User user) {
-        if (user.getName() == null) {
-            user.setName(getUser(user.getId()).getName());
-        }
-        if (user.getEmail() != null) {
-            emails.remove(getUser(user.getId()).getEmail());
-        } else {
-            user.setEmail(getUser(user.getId()).getEmail());
-            emails.remove(user.getEmail());
-        }
-        if (emails.contains(user.getEmail())) {
-            throw new RuntimeException("Duplicate email");
-        }
-    }
-
-    @Override
-    public User getUser(long id) {
-        return userStorage.getUser(id);
-    }
-
-    @Override
-    public List<User> getAllUsers() {
-        return userStorage.getAllUsers();
-    }
-
-    @Override
-    public void deleteUser(long id) {
-        emails.remove(getUser(id).getEmail());
-        userStorage.deleteUser(id);
-    }
-
-    private void validate(User user) {
-        if (emails.contains(user.getEmail())) {
-            throw new RuntimeException("Duplicate email");
-        }
-        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+    private void validate(UserDto userDto) {
+        if (userDto.getEmail() == null || userDto.getEmail().isBlank() || !userDto.getEmail().contains("@")) {
             throw new ValidationException("Email can't be empty and must contains @");
         }
-
-        setId(user);
     }
 
-    private void setId(User user) {
-        if (user.getId() == 0) {
-            user.setId(++generateId);
+    @Transactional
+    @Override
+    public UserDto updateUser(UserDto userDto) {
+        validateUpdate(userDto);
+        User user = userRepository.save(MapperUser.dtoToUser(userDto));
+        return MapperUser.userToDto(user);
+    }
+
+    private void validateUpdate(UserDto userDto) {
+        if (userDto.getName() == null) {
+            userDto.setName(getUser(userDto.getId()).getName());
         }
+        if (userDto.getEmail() == null) {
+            userDto.setEmail(getUser(userDto.getId()).getEmail());
+        }
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public UserDto getUser(long id) {
+        return MapperUser.userToDto(userRepository.getById(id));
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<UserDto> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(MapperUser::userToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    @Override
+    public void deleteUser(long id) {
+        userRepository.deleteById(id);
     }
 
 }
