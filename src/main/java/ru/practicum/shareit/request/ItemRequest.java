@@ -5,6 +5,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -19,6 +20,6 @@ public class ItemRequest {
     @Column(name = "requestor", nullable = false)
     private long requestor;
     @Column(name = "created", nullable = false)
-    private Instant created;
+    private LocalDateTime created;
 
 }
