@@ -1,11 +1,8 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
-import org.hibernate.criterion.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -17,7 +14,6 @@ import ru.practicum.shareit.booking.mapper.MapperBooking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -119,7 +115,8 @@ public class BookingServiceImpl implements BookingService {
             BookingState resultState = Enum.valueOf(BookingState.class, state);
             switch (resultState) {
                 case ALL:
-                    return bookingRepository.findAllByBookerIdAllState(userId, PageRequest.of(parseFrom, parseSize))
+                    return bookingRepository.findAllByBookerIdAllState(userId, PageRequest.of(parseFrom/parseSize, parseSize))
+                            .getContent()
                             .stream()
                             .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
                             .collect(Collectors.toList());

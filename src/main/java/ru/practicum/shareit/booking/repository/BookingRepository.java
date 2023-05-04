@@ -13,11 +13,12 @@ import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    @Query(value = "SELECT bk.id, bk.start_booking, bk.end_booking, bk.booker_id, bk.item_id, bk.status " +
+    @Query("SELECT new Booking(bk.id, bk.start, bk.end, bk.bookerId, bk.itemId, bk.status) " +
             "FROM Booking AS bk " +
-            "WHERE bk.booker_id = ?1 " +
-            "ORDER BY bk.start_booking DESC ", nativeQuery = true)
+            "WHERE bk.bookerId = ?1 " +
+            "ORDER BY bk.end DESC ")
     Page<Booking> findAllByBookerIdAllState(long bookerId, Pageable pageable);
+
 
 
     List<Booking> findAllByItemId(long itemId);
