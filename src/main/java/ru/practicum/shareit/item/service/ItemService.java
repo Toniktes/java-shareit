@@ -17,9 +17,9 @@ public interface ItemService {
 
     ItemDtoWithBooking getItemDtoWithBooking(long itemId, long userId);
 
-    List<ItemDtoWithBooking> getListOfThings(long userId);
+    List<ItemDtoWithBooking> getListOfThings(long userId, String from, String size);
 
-    List<ItemDto> getThingsForSearch(String text);
+    List<ItemDto> getThingsForSearch(String text, String from, String size);
 
     Item getItem(long itemId);
 

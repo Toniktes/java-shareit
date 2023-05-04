@@ -1,5 +1,7 @@
 package ru.practicum.shareit.booking.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.Booking;
@@ -10,7 +12,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    List<Booking> findAllByBookerId(long booker);
+
+    @Query(value = "SELECT bk.id, bk.start_booking, bk.end_booking, bk.booker_id, bk.item_id, bk.status " +
+            "FROM Booking AS bk " +
+            "WHERE bk.booker_id = ?1 " +
+            "ORDER BY bk.start_booking DESC ", nativeQuery = true)
+    Page<Booking> findAllByBookerIdAllState(long bookerId, Pageable pageable);
+
 
     List<Booking> findAllByItemId(long itemId);
 
@@ -31,4 +39,32 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "ORDER BY bk.start_booking " +
             "LIMIT 1 ", nativeQuery = true)
     Optional<Booking> getNext(long itemId);
+
+    @Query(value = "SELECT bk.id, bk.start_booking, bk.end_booking, bk.booker_id, bk.item_id, bk.status " +
+            "FROM Booking AS bk " +
+            "WHERE bk.booker_id = ?1 AND (bk.status = 'APPROVED' OR bk.status = 'WAITING') ", nativeQuery = true)
+    Page<Booking> getAllByBookerIdForFutureState(long bookerId, Pageable pageable);
+
+    @Query(value = "SELECT bk.id, bk.start_booking, bk.end_booking, bk.booker_id, bk.item_id, bk.status " +
+            "FROM Booking AS bk " +
+            "WHERE bk.booker_id = ?1 AND bk.status = 'WAITING' ", nativeQuery = true)
+    Page<Booking> getAllByBookerIdForWaitingState(long bookerId, Pageable pageable);
+
+    @Query(value = "SELECT bk.id, bk.start_booking, bk.end_booking, bk.booker_id, bk.item_id, bk.status " +
+            "FROM Booking AS bk " +
+            "WHERE bk.booker_id = ?1 AND bk.status = 'REJECTED' ", nativeQuery = true)
+    Page<Booking> getAllByBookerIdForRejectedState(long bookerId, Pageable pageable);
+
+    @Query(value = "SELECT bk.id, bk.start_booking, bk.end_booking, bk.booker_id, bk.item_id, bk.status " +
+            "FROM Booking AS bk " +
+            "WHERE bk.booker_id = ?1 AND (bk.status = 'REJECTED' OR bk.status = 'APPROVED') AND " +
+            "(bk.end_booking > CURRENT_TIMESTAMP AND bk.start_booking < CURRENT_TIMESTAMP) ", nativeQuery = true)
+    Page<Booking> getAllByBookerIdForCurrentState(long bookerId, Pageable pageable);
+
+    @Query(value = "SELECT bk.id, bk.start_booking, bk.end_booking, bk.booker_id, bk.item_id, bk.status " +
+            "FROM Booking AS bk " +
+            "WHERE bk.booker_id = ?1 AND bk.status = 'APPROVED' AND " +
+            "(bk.end_booking < CURRENT_TIMESTAMP AND bk.start_booking < CURRENT_TIMESTAMP) ", nativeQuery = true)
+    Page<Booking> getAllByBookerIdForPastState(long bookerId, Pageable pageable);
+
 }

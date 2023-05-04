@@ -23,28 +23,34 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@PathVariable("itemId") long itemId, @RequestBody ItemDto itemDto, @RequestHeader("X-Sharer-User-Id") long userId) {
+    public ItemDto updateItem(@PathVariable("itemId") long itemId, @RequestBody ItemDto itemDto,
+                              @RequestHeader("X-Sharer-User-Id") long userId) {
         log.debug("received a request to update Item with id: {}", itemId);
         return itemService.updateItem(itemDto, itemId, userId);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDtoWithBooking getItemInfo(@PathVariable("itemId") long itemId, @RequestHeader("X-Sharer-User-Id") long userId) {
+    public ItemDtoWithBooking getItemInfo(@PathVariable("itemId") long itemId,
+                                          @RequestHeader("X-Sharer-User-Id") long userId) {
         log.debug("received a request to get info for itemId: {}", itemId);
         return itemService.getItemDtoWithBooking(itemId, userId);
     }
 
     @GetMapping
-    public List<ItemDtoWithBooking> getListOfThings(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public List<ItemDtoWithBooking> getListOfThings(@RequestHeader("X-Sharer-User-Id") long userId,
+                                                    @RequestParam(defaultValue = "0") String from,
+                                                    @RequestParam(defaultValue = "20") String size) {
         log.debug("received a request to get list of things for userId: {}", userId);
-        return itemService.getListOfThings(userId);
+        return itemService.getListOfThings(userId, from, size);
 
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchThing(@RequestParam String text) {
+    public List<ItemDto> searchThing(@RequestParam String text,
+                                     @RequestParam(defaultValue = "0") String from,
+                                     @RequestParam(defaultValue = "20") String size) {
         log.debug("received a request to search a thing by text: {}", text);
-        return itemService.getThingsForSearch(text);
+        return itemService.getThingsForSearch(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")

@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -94,8 +95,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemDtoWithBooking> getListOfThings(long userId) {
-        return itemRepository.findAllByOwner(userId)
+    public List<ItemDtoWithBooking> getListOfThings(long userId, String from, String size) {
+        validatePageParameters(from, size);
+        return itemRepository.findAllByOwner(userId, PageRequest.of(Integer.parseInt(from), Integer.parseInt(size)))
                 .stream()
                 .map(mapperItem::itemToDtoWithBooking)
                 .collect(Collectors.toList());
@@ -103,11 +105,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemDto> getThingsForSearch(String text) {
+    public List<ItemDto> getThingsForSearch(String text, String from, String size) {
         if (text == null || text.isEmpty()) {
             return List.of();
         }
-        return itemRepository.findAll()
+        validatePageParameters(from, size);
+        return itemRepository.findAll(PageRequest.of(Integer.parseInt(from), Integer.parseInt(size)))
                 .stream()
                 .filter(x -> x.getDescription().toLowerCase().contains(text.toLowerCase()) ||
                         x.getName().toLowerCase().contains(text.toLowerCase()))
@@ -142,6 +145,21 @@ public class ItemServiceImpl implements ItemService {
         comment.setItem(itemId);
         comment.setCreated(LocalDateTime.now());
         return commentRepository.save(comment);
+    }
+
+    private void validatePageParameters (String from, String size) {
+        int parseFrom;
+        int parseSize;
+        try {
+            parseFrom = Integer.parseInt(from);
+            parseSize = Integer.parseInt(size);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("from or size not a number");
+        }
+        if (parseFrom < 0 || parseSize <= 0) {
+            throw new ValidationException("from can't be < 0 and size can't be <= 0");
+        }
+
     }
 
 }

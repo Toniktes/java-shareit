@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
+import java.util.List;
+
 
 @Slf4j
 @RequiredArgsConstructor
@@ -22,9 +24,25 @@ public class ItemRequestController {
     }
 
     @GetMapping
-    public ItemRequestDto getOwnRequestsList(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public List<ItemRequestDto> getOwnRequestsList(@RequestHeader("X-Sharer-User-Id") long userId) {
         log.debug("received a request to get getOwnRequestsList");
         return itemRequestService.getOwnRequestsList(userId);
     }
+
+    @GetMapping("/all")
+    public List<ItemRequestDto> getRequestsList(@RequestParam(defaultValue = "0") String from, @RequestParam(defaultValue = "20") String size,
+                                                @RequestHeader("X-Sharer-User-Id") long userId) {
+        log.debug("received a request to get getRequestsList");
+        return itemRequestService.getRequestsList(from, size, userId);
+    }
+
+    @GetMapping("/{requestId}")
+    public ItemRequestDto getRequestById(@RequestHeader("X-Sharer-User-Id") long userId,
+                                         @PathVariable(value = "requestId") long requestId) {
+        log.debug("received a request to get getRequestById");
+        return itemRequestService.getRequestById(userId, requestId);
+
+    }
+
 
 }
