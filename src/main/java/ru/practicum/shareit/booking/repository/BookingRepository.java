@@ -19,8 +19,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "ORDER BY bk.end DESC ")
     Page<Booking> findAllByBookerIdAllState(long bookerId, Pageable pageable);
 
-
-
     List<Booking> findAllByItemId(long itemId);
 
     LastAndNextBooking getByIdAndItemId(long id, long itemId);

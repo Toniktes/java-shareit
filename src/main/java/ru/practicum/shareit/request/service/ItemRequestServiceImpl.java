@@ -18,7 +18,6 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 @RequiredArgsConstructor
@@ -51,54 +50,38 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public List<ItemRequestDto> getOwnRequestsList(long userId) {
         validateUser(userId);
-        List<ItemRequestDto> list = itemRequestRepository.findAllByRequestor(userId)
+        List<ItemRequestDto> itemRequestDtos = itemRequestRepository.findAllByRequestor(userId)
                 .stream()
                 .map(MapperItemRequest::toDto)
                 .collect(Collectors.toList());
 
-        for (ItemRequestDto item : list) {
-            item.setItems(
-                    new ArrayList<>(
-                            (Optional.of(itemRepository.findAllByRequestId(item.getId()))
-                                    .orElse(Collections.emptyList()))
-                                    .stream()
-                                    .map(MapperItem::itemToDto)
-                                    .collect(Collectors.toList()))
-            );
-        }
-        return list.stream().sorted(Comparator.comparing(ItemRequestDto::getCreated).reversed()).collect(Collectors.toList());
+        return getItemRequestDtos(itemRequestDtos);
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<ItemRequestDto> getRequestsList(String from, String size, long userId) {
-        int parseFrom;
-        int parseSize;
-        try {
-            parseFrom = Integer.parseInt(from);
-            parseSize = Integer.parseInt(size);
-        } catch (NumberFormatException e) {
-            throw new ValidationException("from or size not a number");
-        }
-        if (parseFrom < 0 || parseSize <= 0) {
-            throw new ValidationException("from can't be < 0 and size can't be <= 0");
-        }
-        List<ItemRequestDto> list = itemRequestRepository.findAllByIdIsNot(userId)
+        validatePageParameters(from, size);
+        List<ItemRequestDto> itemRequestDtos = itemRequestRepository.findAllByIdIsNot(userId)
                 .stream()
                 .map(MapperItemRequest::toDto)
                 .collect(Collectors.toList());
 
-        for (ItemRequestDto item : list) {
-            item.setItems(
-                    new ArrayList<>(
-                            (Optional.of(itemRepository.findAllByRequestId(item.getId()))
-                                    .orElse(Collections.emptyList()))
-                                    .stream()
-                                    .map(MapperItem::itemToDto)
-                                    .collect(Collectors.toList()))
-            );
-        }
-        return list.stream().sorted(Comparator.comparing(ItemRequestDto::getCreated).reversed()).collect(Collectors.toList());
+        return getItemRequestDtos(itemRequestDtos);
+    }
+
+    private List<ItemRequestDto> getItemRequestDtos(List<ItemRequestDto> itemRequestDtos) {
+        itemRequestDtos.forEach(x -> x.setItems(
+                new ArrayList<>(
+                        (Optional.of(itemRepository.findAllByRequestId(x.getId()))
+                                .orElse(Collections.emptyList()))
+                                .stream()
+                                .map(MapperItem::itemToDto)
+                                .collect(Collectors.toList())
+                )
+        ));
+
+        return itemRequestDtos.stream().sorted(Comparator.comparing(ItemRequestDto::getCreated).reversed()).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -123,6 +106,21 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private void validateUser(long userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("not found user with id: " + userId));
+    }
+
+    private void validatePageParameters(String from, String size) {
+        int parseFrom;
+        int parseSize;
+        try {
+            parseFrom = Integer.parseInt(from);
+            parseSize = Integer.parseInt(size);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("from or size not a number");
+        }
+        if (parseFrom < 0 || parseSize <= 0) {
+            throw new ValidationException("from can't be < 0 and size can't be <= 0");
+        }
+
     }
 
 

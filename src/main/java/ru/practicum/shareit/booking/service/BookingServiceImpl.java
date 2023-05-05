@@ -115,11 +115,8 @@ public class BookingServiceImpl implements BookingService {
             BookingState resultState = Enum.valueOf(BookingState.class, state);
             switch (resultState) {
                 case ALL:
-                    return bookingRepository.findAllByBookerIdAllState(userId, PageRequest.of(parseFrom/parseSize, parseSize))
-                            .getContent()
-                            .stream()
-                            .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
-                            .collect(Collectors.toList());
+                   return mapAndSorted(bookingRepository.findAllByBookerIdAllState(userId,
+                            PageRequest.of(parseFrom / parseSize, parseSize)));
                 case FUTURE:
                     return mapAndSorted(bookingRepository.getAllByBookerIdForFutureState(userId,
                             PageRequest.of(parseFrom, parseSize)));
@@ -147,7 +144,7 @@ public class BookingServiceImpl implements BookingService {
         return page
                 .stream()
                 .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
-                .sorted(Comparator.comparing(BookingDtoResponse::getEnd).reversed())
+                .sorted(Comparator.comparing(BookingDtoResponse::getStart).reversed())
                 .collect(Collectors.toList());
     }
 
@@ -174,9 +171,9 @@ public class BookingServiceImpl implements BookingService {
                         bookings.addAll(bookingRepository.findAllByItemId(ids));
                     }
                     return mapAndSortedWithStart(bookings
-                            .stream()
-                            .filter(x -> x.getStatus() == BookingStatus.WAITING
-                                    || x.getStatus() == BookingStatus.APPROVED),
+                                    .stream()
+                                    .filter(x -> x.getStatus() == BookingStatus.WAITING
+                                            || x.getStatus() == BookingStatus.APPROVED),
                             Integer.parseInt(from), Integer.parseInt(size));
                 case WAITING:
                     list = itemRepository.getListItemIdByUser(userId);
@@ -184,7 +181,7 @@ public class BookingServiceImpl implements BookingService {
                         bookings.addAll(bookingRepository.findAllByItemId(ids));
                     }
                     return mapAndSortedWithStart(bookings.stream()
-                            .filter(x -> x.getStatus() == BookingStatus.WAITING),
+                                    .filter(x -> x.getStatus() == BookingStatus.WAITING),
                             Integer.parseInt(from), Integer.parseInt(size));
                 case REJECTED:
                     list = itemRepository.getListItemIdByUser(userId);
@@ -192,7 +189,7 @@ public class BookingServiceImpl implements BookingService {
                         bookings.addAll(bookingRepository.findAllByItemId(ids));
                     }
                     return mapAndSortedWithStart(bookings.stream()
-                            .filter(x -> x.getStatus() == BookingStatus.REJECTED),
+                                    .filter(x -> x.getStatus() == BookingStatus.REJECTED),
                             Integer.parseInt(from), Integer.parseInt(size));
                 case CURRENT:
                     list = itemRepository.getListItemIdByUser(userId);
@@ -200,8 +197,8 @@ public class BookingServiceImpl implements BookingService {
                         bookings.addAll(bookingRepository.findAllByItemId(ids));
                     }
                     return mapAndSortedWithStart(bookings.stream()
-                            .filter(x -> x.getStatus() == BookingStatus.REJECTED || x.getStatus() == BookingStatus.APPROVED)
-                            .filter(x -> x.getEnd().isAfter(LocalDateTime.now()) && x.getStart().isBefore(LocalDateTime.now())),
+                                    .filter(x -> x.getStatus() == BookingStatus.REJECTED || x.getStatus() == BookingStatus.APPROVED)
+                                    .filter(x -> x.getEnd().isAfter(LocalDateTime.now()) && x.getStart().isBefore(LocalDateTime.now())),
                             Integer.parseInt(from), Integer.parseInt(size));
                 case PAST:
                     list = itemRepository.getListItemIdByUser(userId);
@@ -209,8 +206,8 @@ public class BookingServiceImpl implements BookingService {
                         bookings.addAll(bookingRepository.findAllByItemId(ids));
                     }
                     return mapAndSortedWithStart(bookings.stream()
-                            .filter(x -> x.getStatus() == BookingStatus.APPROVED)
-                            .filter(x -> x.getEnd().isBefore(LocalDateTime.now()) && x.getStart().isBefore(LocalDateTime.now())),
+                                    .filter(x -> x.getStatus() == BookingStatus.APPROVED)
+                                    .filter(x -> x.getEnd().isBefore(LocalDateTime.now()) && x.getStart().isBefore(LocalDateTime.now())),
                             Integer.parseInt(from), Integer.parseInt(size));
                 default:
                     throw new ValidationException("Unknown state: UNSUPPORTED_STATUS");
@@ -219,13 +216,6 @@ public class BookingServiceImpl implements BookingService {
             throw new ValidationException("Unknown state: UNSUPPORTED_STATUS");
         }
     }
-
-  /*  private List<Long> getListItemIdForUser(long userId) {
-        return itemRepository.findAllByOwner(userId)
-                .stream()
-                .map(Item::getId)
-                .collect(Collectors.toList());
-    }*/
 
     private List<BookingDtoResponse> mapAndSortedWithStart(Stream<Booking> stream, int from, int size) {
         return stream

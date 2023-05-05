@@ -27,7 +27,7 @@ public class MapperItem {
                 itemDto.getAvailable(),
                 userId,
                 itemDto.getRequestId()
-                );
+        );
     }
 
     public static ItemDto itemToDto(Item item) {
