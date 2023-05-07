@@ -14,6 +14,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DataJpaTest
 class UserRepositoryIT {
 
+    @Autowired
+    private UserRepository userRepository;
+
     @BeforeEach
     void beforeEach() {
         userRepository.save(new User(1, "name", "yan@mail.ru"));
@@ -23,9 +26,6 @@ class UserRepositoryIT {
     void afterEach() {
         userRepository.deleteAll();
     }
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Test
     void findByNameAndId() {
