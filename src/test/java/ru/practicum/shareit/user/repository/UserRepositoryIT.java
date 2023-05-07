@@ -18,6 +18,7 @@ class UserRepositoryIT {
     void beforeEach() {
         userRepository.save(new User(1, "name", "yan@mail.ru"));
     }
+
     @AfterEach
     void afterEach() {
         userRepository.deleteAll();
@@ -28,7 +29,7 @@ class UserRepositoryIT {
 
     @Test
     void findByNameAndId() {
-        UserShort actualUser = userRepository.findByNameAndId("name" , 1);
+        UserShort actualUser = userRepository.findByNameAndId("name", 1);
         assertEquals(1, actualUser.getId());
     }
 }
