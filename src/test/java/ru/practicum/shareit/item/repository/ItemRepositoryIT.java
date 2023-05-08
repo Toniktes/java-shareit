@@ -31,9 +31,9 @@ class ItemRepositoryIT {
     @Autowired
     private ItemRequestRepository itemRequestRepository;
 
-    User user;
-    ItemRequest itemRequest;
-    Item item;
+    private User user;
+    private ItemRequest itemRequest;
+    private Item item;
 
     @BeforeEach
     public void beforeEach() {

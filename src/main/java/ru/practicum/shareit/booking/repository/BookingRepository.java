@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.dto.LastAndNextBooking;
@@ -11,6 +12,7 @@ import ru.practicum.shareit.booking.dto.LastAndNextBooking;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("SELECT new Booking(bk.id, bk.start, bk.end, bk.bookerId, bk.itemId, bk.status) " +
