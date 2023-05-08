@@ -36,7 +36,7 @@ public class BookingController {
     @GetMapping("/{bookingId}")
     public BookingDtoResponse getBooking(@PathVariable long bookingId, @RequestHeader("X-Sharer-User-Id") long userId) {
         log.debug("received a request to getBooking");
-        return bookingService.getBooking(bookingId, userId);
+        return bookingService.getBookingDtoResponse(bookingId, userId);
     }
 
     @GetMapping

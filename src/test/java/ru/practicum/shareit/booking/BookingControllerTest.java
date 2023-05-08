@@ -109,7 +109,7 @@ class BookingControllerTest {
     @SneakyThrows
     @Test
     void getBooking() {
-        when(bookingService.getBooking(anyLong(), anyLong()))
+        when(bookingService.getBookingDtoResponse(anyLong(), anyLong()))
                 .thenReturn(bookingDtoResponse);
 
         mockMvc.perform(get("/bookings/{bookingId}", bookingDtoResponse.getId())

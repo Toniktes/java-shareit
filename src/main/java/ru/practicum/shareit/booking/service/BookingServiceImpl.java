@@ -50,7 +50,7 @@ public class BookingServiceImpl implements BookingService {
         itemRepository.findById(bookingDto.getItemId())
                 .orElseThrow(() -> new NotFoundException("not found item with id: " + bookingDto.getItemId()));
         if (itemRepository.getById(bookingDto.getItemId()).getOwner() == userId) {
-            throw new NotFoundException("kk");
+            throw new NotFoundException("user must be the owner");
         }
         if (!itemRepository.getById(bookingDto.getItemId()).getAvailable()) {
             throw new ValidationException("booking for item with id: " + bookingDto.getItemId() + " not available");
@@ -87,7 +87,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional(readOnly = true)
     @Override
-    public BookingDtoResponse getBooking(long bookingId, long userId) {
+    public BookingDtoResponse getBookingDtoResponse(long bookingId, long userId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("not found booking with id: " + bookingId));
         if (booking.getBookerId() == userId || itemService.getItem(booking.getItemId()).getOwner() == userId) {
@@ -115,7 +115,7 @@ public class BookingServiceImpl implements BookingService {
             BookingState resultState = Enum.valueOf(BookingState.class, state);
             switch (resultState) {
                 case ALL:
-                   return mapAndSorted(bookingRepository.findAllByBookerIdAllState(userId,
+                    return mapAndSorted(bookingRepository.findAllByBookerIdAllState(userId,
                             PageRequest.of(parseFrom / parseSize, parseSize)));
                 case FUTURE:
                     return mapAndSorted(bookingRepository.getAllByBookerIdForFutureState(userId,
