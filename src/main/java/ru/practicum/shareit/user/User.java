@@ -3,13 +3,13 @@ package ru.practicum.shareit.user;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Data
 @AllArgsConstructor
-@RequiredArgsConstructor
+@NoArgsConstructor
 @Builder
 @Entity
 @Table(name = "users")

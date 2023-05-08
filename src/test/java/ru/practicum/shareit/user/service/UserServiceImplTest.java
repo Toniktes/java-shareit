@@ -107,7 +107,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void deleteUser() {
+    void deleteUser_whenInvoked() {
         doNothing().when(userRepository).deleteById(Mockito.anyLong());
         userService.deleteUser(userDto.getId());
         verify(userRepository, times(1)).deleteById(Mockito.anyLong());
