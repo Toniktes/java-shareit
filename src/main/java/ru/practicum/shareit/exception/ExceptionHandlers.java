@@ -27,5 +27,4 @@ public class ExceptionHandlers {
     public ErrorResponse entityNotFoundException(EntityNotFoundException e) {
         return new ErrorResponse(e.getMessage());
     }
-
 }
