@@ -97,7 +97,7 @@ class BookingServiceImplTests {
     }
 
     @Test
-    public void addBooking_whenInvoked_thenSaveBooking() {
+    void addBooking_whenInvoked_thenSaveBooking() {
         item.setOwner(user2.getId());
         BookingDtoResponse savedBooking = bookingService.addBooking(bookingDto, user.getId());
 

@@ -38,7 +38,7 @@ public class ItemServiceImpl implements ItemService {
         return MapperItem.itemToDto(item);
     }
 
-     void validate(ItemDto itemDto, long userId) {
+    private void validate(ItemDto itemDto, long userId) {
         if (itemDto.getAvailable() == null || itemDto.getName() == null || itemDto.getDescription() == null) {
             throw new ValidationException("without parameter: available or name or description");
         }
@@ -58,7 +58,7 @@ public class ItemServiceImpl implements ItemService {
         return MapperItem.itemToDto(item);
     }
 
-    void validateUpdate(ItemDto itemDto, long itemId, long userId) {
+    private void validateUpdate(ItemDto itemDto, long itemId, long userId) {
         if (itemDto.getName() == null) {
             itemDto.setName(getItemDto(itemId).getName());
         }
