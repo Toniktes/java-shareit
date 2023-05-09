@@ -15,6 +15,7 @@ import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoResponse;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -105,7 +106,25 @@ class BookingServiceImplTests {
     }
 
     @Test
-    void processTheRequest() {
+    void addBooking_whenOwnerEqualsUserId_thenThrowException() {
+        assertThrows(NotFoundException.class, () -> bookingService.addBooking(bookingDto, user.getId()));
+    }
+
+    @Test
+    void addBooking_whenItemAvailableIsFalse_thenThrowException() {
+        item.setAvailable(false);
+        itemRepository.save(item);
+        assertThrows(NotFoundException.class, () -> bookingService.addBooking(bookingDto, user.getId()));
+    }
+
+    @Test
+    void addBooking_whenBookingStartEqualsEnd_thenThrowException() {
+        bookingDto.setEnd(bookingDto.getStart());
+        assertThrows(NotFoundException.class, () -> bookingService.addBooking(bookingDto, user.getId()));
+    }
+
+    @Test
+    void processTheRequest_whenInvoked_thenReturnBookingDtoResponse() {
         BookingDtoResponse bookingResponse = bookingService.processTheRequest(user.getId(),
                 booking.getId(), "true");
 
@@ -113,14 +132,31 @@ class BookingServiceImplTests {
     }
 
     @Test
-    void getBookingDtoResponse() {
+    void processTheRequest_whenBookingStatusApproved_thenThrowException() {
+        booking.setStatus(BookingStatus.APPROVED);
+        bookingRepository.save(booking);
+        assertThrows(ValidationException.class, () -> bookingService.processTheRequest(user.getId(), booking.getId(), "APPROVED"));
+    }
+
+    @Test
+    void processTheRequest_whenNotOwner_thenThrowException() {
+        assertThrows(NotFoundException.class, () -> bookingService.processTheRequest(999, booking.getId(), "APPROVED"));
+    }
+
+    @Test
+    void getBookingDtoResponse_whenInvoked_thenReturnBookingDtoResponse() {
         BookingDtoResponse bookingResponse = bookingService.getBookingDtoResponse(booking.getId(), user.getId());
 
         assertEquals(bookingResponse.getId(), booking.getId());
     }
 
     @Test
-    void getBooking() {
+    void getBookingDtoResponse_whenBookerIdNotEqualUserId_thenThrowException() {
+        assertThrows(NotFoundException.class, () -> bookingService.getBookingDtoResponse(booking.getId(), 999));
+    }
+
+    @Test
+    void getBooking_whenInvoked_thenReturnBooking() {
         Booking bookingResponse = bookingService.getBooking(booking.getId());
 
         assertEquals(bookingResponse, booking);
