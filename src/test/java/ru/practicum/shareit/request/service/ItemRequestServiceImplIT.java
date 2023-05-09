@@ -128,6 +128,18 @@ class ItemRequestServiceImplIT {
     }
 
     @Test
+    void getRequestsList_whenNotValidParameters_thenThrowsException() {
+        assertThrows(ValidationException.class, () -> itemRequestService.getRequestsList("a", "b",
+                user.getId() + 1));
+    }
+
+    @Test
+    void getRequestsList_whenParametersIsNegative_thenThrowsException() {
+        assertThrows(ValidationException.class, () -> itemRequestService.getRequestsList("-1", "-1",
+                user.getId() + 1));
+    }
+
+    @Test
     void getRequestById_whenInvoked_thenReturnItemRequestDto() {
         List<ItemDto> itemDtos = Stream.of(item).map(MapperItem::itemToDto).collect(Collectors.toList());
         ItemRequestDto itemRequestDto = MapperItemRequest.toDto(itemRequest);

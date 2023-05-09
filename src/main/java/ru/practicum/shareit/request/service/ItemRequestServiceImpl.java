@@ -123,8 +123,5 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         if (parseFrom < 0 || parseSize <= 0) {
             throw new ValidationException("from can't be < 0 and size can't be <= 0");
         }
-
     }
-
-
 }
