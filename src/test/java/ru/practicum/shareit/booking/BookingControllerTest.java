@@ -68,7 +68,6 @@ class BookingControllerTest {
 
     @SneakyThrows
     @Test
-    @JsonFormat(pattern = "dd-MM-yyyy")
     void addBooking_whenInvoked_thenReturnStatusOkWithCreatedBookingInBody() {
         when(bookingService.addBooking(any(), anyLong()))
                 .thenReturn(bookingDtoResponse);
