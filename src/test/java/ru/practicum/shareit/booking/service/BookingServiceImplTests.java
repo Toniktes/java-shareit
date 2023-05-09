@@ -14,7 +14,6 @@ import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoResponse;
-import ru.practicum.shareit.booking.mapper.MapperBooking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.Item;
@@ -44,7 +43,6 @@ class BookingServiceImplTests {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final ItemRequestRepository itemRequestRepository;
-    private final MapperBooking mapperBooking;
     private ItemRequest itemRequest;
     private User user;
     private User user2;

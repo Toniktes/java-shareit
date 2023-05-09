@@ -1,6 +1,7 @@
 package ru.practicum.shareit.request.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -62,7 +63,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public List<ItemRequestDto> getRequestsList(String from, String size, long userId) {
         validatePageParameters(from, size);
-        List<ItemRequestDto> itemRequestDtos = itemRequestRepository.findAllByIdIsNot(userId)
+        List<ItemRequestDto> itemRequestDtos = itemRequestRepository.findAllByIdIsNot(userId,
+                        PageRequest.of(Integer.parseInt(from), Integer.parseInt(size)))
+                .getContent()
                 .stream()
                 .map(MapperItemRequest::toDto)
                 .collect(Collectors.toList());
