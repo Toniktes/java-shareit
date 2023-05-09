@@ -1,13 +1,15 @@
 package ru.practicum.shareit.user.service;
 
+import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import ru.practicum.shareit.exception.NotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -15,102 +17,99 @@ import ru.practicum.shareit.user.mapper.MapperUser;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@ExtendWith(MockitoExtension.class)
+@Transactional
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureTestDatabase
+@ActiveProfiles("test")
+@Sql(scripts = {"file:src/main/resources/schema.sql"})
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 class UserServiceImplTest {
-
-    private UserDto userDto;
+    private final UserRepository userRepository;
+    private final UserServiceImpl userService;
+    private User user;
 
     @BeforeEach
-    void setUp() {
-        userDto = new UserDto(
-                1,
-                "name",
-                "yan@email"
-        );
+    public void setUp() {
+        user = userRepository.save(User.builder()
+                .name("name")
+                .email("yan@mail.ru")
+                .build());
     }
 
-    @Mock
-    private UserRepository userRepository;
-
-    @InjectMocks
-    private UserServiceImpl userService;
-
-    @Test
-    void addUser_whenValidUser_thenReturnUser() {
-        when(userRepository.save(Mockito.any()))
-                .thenReturn(MapperUser.dtoToUser(userDto));
-        UserDto actualUser = userService.addUser(userDto);
-
-        assertEquals(userDto, actualUser);
-        verify(userRepository).save(MapperUser.dtoToUser(userDto));
+    @AfterEach
+    public void afterEach() {
+        userRepository.deleteAll();
     }
 
     @Test
-    void addUser_whenNotValidUser_thenThrowException() {
-        when(userRepository.save(Mockito.any())).thenThrow(ValidationException.class);
+    void addUser_whenValid_thenSaveAndReturnUser() {
+        UserDto userDto = userService.addUser(MapperUser.userToDto(user));
 
-        assertThrows(ValidationException.class, () -> userService.addUser(userDto));
+        assertEquals(userRepository.getById(userDto.getId()), MapperUser.dtoToUser(userDto));
     }
 
     @Test
-    void updateUser_whenValidUser_thenReturnUser() {
-        when(userRepository.save(Mockito.any()))
-                .thenReturn(MapperUser.dtoToUser(userDto));
-        UserDto actualUser = userService.updateUser(userDto);
+    void addUser_whenNotValid_thenThrowException() {
+        user.setEmail("");
 
-        assertEquals(userDto, actualUser);
-        verify(userRepository).save(MapperUser.dtoToUser(userDto));
+        assertThrows(ValidationException.class, () -> userService.addUser(MapperUser.userToDto(user)));
     }
 
     @Test
-    void updateUser_whenNotValidUser_thenReturnUser() {
-        when(userRepository.save(Mockito.any())).thenThrow(ValidationException.class);
+    void updateUser_whenValid_thenUpdateAndReturnUser() {
+        user.setName("newName");
+        UserDto userDto = userService.updateUser(MapperUser.userToDto(user));
 
-        assertThrows(ValidationException.class, () -> userService.addUser(userDto));
+        assertEquals(userRepository.getById(userDto.getId()), MapperUser.dtoToUser(userDto));
     }
 
     @Test
-    void getUser_whenUserFound_thenReturnUser() {
-        User user = new User(
-                1,
-                "name",
-                "yan@email");
-        when(userRepository.getById(Mockito.anyLong())).thenReturn(user);
+    void updateUser_whenNameIsNull_thenUpdateAndReturnUser() {
+        UserDto userNew = UserDto.builder()
+                .id(user.getId())
+                .email("yan3@mail.ru")
+                .build();
+        UserDto userDto = userService.updateUser(userNew);
 
-        UserDto actualUser = userService.getUser(userDto.getId());
-
-        assertEquals(userDto, actualUser);
-    }
-
-
-    @Test
-    void getUser_whenUserNotFound_thenThrowException() {
-        when(userRepository.getById(Mockito.anyLong())).thenThrow(NotFoundException.class);
-
-        assertThrows(NotFoundException.class, () -> userService.getUser(userDto.getId()));
+        assertEquals(userRepository.getById(userDto.getId()), MapperUser.dtoToUser(userDto));
     }
 
     @Test
-    void getAllUsers_whenInvoked_thenReturnListOfUsers() {
-        User user = new User(
-                1,
-                "name",
-                "yan@email");
-        List<UserDto> userList = List.of(userDto);
-        when(userRepository.findAll()).thenReturn(List.of(user));
+    void updateUser_whenEmailIsNull_thenUpdateAndReturnUser() {
+        UserDto userNew = UserDto.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .build();
+        UserDto userDto = userService.updateUser(userNew);
 
-        assertEquals(userList, userService.getAllUsers());
+        assertEquals(userRepository.getById(userDto.getId()), MapperUser.dtoToUser(userDto));
     }
 
     @Test
-    void deleteUser_whenInvoked() {
-        doNothing().when(userRepository).deleteById(Mockito.anyLong());
-        userService.deleteUser(userDto.getId());
-        verify(userRepository, times(1)).deleteById(Mockito.anyLong());
+    void getUser_whenInvoked_thenReturnUserDto() {
+        UserDto userDto = userService.getUser(user.getId());
 
+        assertEquals(userRepository.getById(userDto.getId()), MapperUser.dtoToUser(userDto));
     }
+
+    @Test
+    void getAllUsers_whenInvoked_thenReturnListUserDto() {
+        List<UserDto> userDtoList = userService.getAllUsers();
+
+        assertEquals(List.of(MapperUser.userToDto(user)), userDtoList);
+    }
+
+    @Test
+    void deleteUser_whenInvoked_thenDeleteUser() {
+        userService.deleteUser(user.getId());
+
+        assertEquals(Optional.empty(), userRepository.findById(user.getId()));
+    }
+
+
 }
