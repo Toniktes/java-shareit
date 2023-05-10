@@ -147,7 +147,7 @@ public class ItemServiceImpl implements ItemService {
         return commentRepository.save(comment);
     }
 
-    private void validatePageParameters(String from, String size) {
+    public void validatePageParameters(String from, String size) {
         int parseFrom;
         int parseSize;
         try {

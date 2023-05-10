@@ -127,7 +127,7 @@ class ItemServiceImplTests {
     }
 
     @Test
-    void addItem_whenNotValidIsNull_thenThrowException() {
+    void addItem_whenNotValidAvailableIsNull_thenThrowException() {
         itemDto.setAvailable(null);
 
         assertThrows(ValidationException.class, () -> itemService.addItem(itemDto, user.getId()));
