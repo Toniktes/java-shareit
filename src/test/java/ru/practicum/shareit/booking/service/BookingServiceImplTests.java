@@ -114,15 +114,17 @@ class BookingServiceImplTests {
 
     @Test
     void addBooking_whenItemAvailableIsFalse_thenThrowException() {
+        item.setOwner(user2.getId());
         item.setAvailable(false);
         itemRepository.save(item);
-        assertThrows(NotFoundException.class, () -> bookingService.addBooking(bookingDto, user.getId()));
+        assertThrows(ValidationException.class, () -> bookingService.addBooking(bookingDto, user.getId()));
     }
 
     @Test
     void addBooking_whenBookingStartEqualsEnd_thenThrowException() {
+        item.setOwner(user2.getId());
         bookingDto.setEnd(bookingDto.getStart());
-        assertThrows(NotFoundException.class, () -> bookingService.addBooking(bookingDto, user.getId()));
+        assertThrows(ValidationException.class, () -> bookingService.addBooking(bookingDto, user.getId()));
     }
 
     @Test
@@ -244,6 +246,16 @@ class BookingServiceImplTests {
     }
 
     @Test
+    void getBookingListForThingsUser_whenStateFutureAndStatusApproved_thenReturnListOfBookings() {
+        booking.setStatus(BookingStatus.APPROVED);
+        bookingRepository.save(booking);
+        List<BookingDtoResponse> bookingResponse = bookingService.getBookingListForThingsUser("FUTURE",
+                user.getId(), "0", "20");
+
+        assertEquals(bookingResponse.size(), 1);
+    }
+
+    @Test
     void getBookingListForThingsUser_whenStateWaiting_thenReturnListOfBookings() {
         List<BookingDtoResponse> bookingResponse = bookingService.getBookingListForThingsUser("WAITING",
                 user.getId(), "0", "20");
@@ -295,5 +307,11 @@ class BookingServiceImplTests {
     void getBookingListForThingsUser_whenNotValidPageParam_thenThrowException() {
         assertThrows(ValidationException.class, () -> bookingService.getBookingListForThingsUser("All",
                 user.getId(), "d", "d"));
+    }
+
+    @Test
+    void getBookingListForThingsUser_whenPageParamIsNegative_thenThrowException() {
+        assertThrows(ValidationException.class, () -> bookingService.getBookingListForThingsUser("All",
+                user.getId(), "-1", "-1"));
     }
 }
