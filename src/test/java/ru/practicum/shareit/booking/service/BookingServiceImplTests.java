@@ -136,15 +136,23 @@ class BookingServiceImplTests {
     }
 
     @Test
+    void processTheRequest_whenApprovedIsFalse_thenReturnBookingDtoResponseWithStatusIsRejected() {
+        BookingDtoResponse bookingResponse = bookingService.processTheRequest(user.getId(),
+                booking.getId(), "false");
+
+        assertEquals(BookingStatus.REJECTED, bookingResponse.getStatus());
+    }
+
+    @Test
     void processTheRequest_whenBookingStatusApproved_thenThrowException() {
         booking.setStatus(BookingStatus.APPROVED);
         bookingRepository.save(booking);
-        assertThrows(ValidationException.class, () -> bookingService.processTheRequest(user.getId(), booking.getId(), "APPROVED"));
+        assertThrows(ValidationException.class, () -> bookingService.processTheRequest(user.getId(), booking.getId(), "true"));
     }
 
     @Test
     void processTheRequest_whenNotOwner_thenThrowException() {
-        assertThrows(NotFoundException.class, () -> bookingService.processTheRequest(999, booking.getId(), "APPROVED"));
+        assertThrows(NotFoundException.class, () -> bookingService.processTheRequest(999, booking.getId(), "true"));
     }
 
     @Test

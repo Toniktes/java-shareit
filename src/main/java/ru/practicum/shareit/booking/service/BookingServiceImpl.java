@@ -74,9 +74,6 @@ public class BookingServiceImpl implements BookingService {
             } else {
                 booking.setStatus(BookingStatus.REJECTED);
             }
-            if (booking.getBookerId() == 0) {
-                booking.setBookerId(bookingId);
-            }
             return mapperBooking.bookingToDtoResponse(bookingRepository.save(booking),
                     itemService.getItem(booking.getItemId()));
 
