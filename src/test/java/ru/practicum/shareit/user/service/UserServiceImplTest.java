@@ -70,10 +70,10 @@ class UserServiceImplTest {
 
     @Test
     void updateUser_whenNameIsNull_thenUpdateAndReturnUser() {
-        UserDto userNew = UserDto.builder()
-                .id(user.getId())
-                .email("yan3@mail.ru")
-                .build();
+        UserDto userNew = new UserDto();
+        userNew.setId(user.getId());
+        userNew.setEmail("yan3@mail.ru");
+
         UserDto userDto = userService.updateUser(userNew);
 
         assertEquals(userRepository.getById(userDto.getId()), MapperUser.dtoToUser(userDto));
@@ -81,10 +81,10 @@ class UserServiceImplTest {
 
     @Test
     void updateUser_whenEmailIsNull_thenUpdateAndReturnUser() {
-        UserDto userNew = UserDto.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .build();
+        UserDto userNew = new UserDto();
+        userNew.setId(user.getId());
+        userNew.setName(user.getName());
+
         UserDto userDto = userService.updateUser(userNew);
 
         assertEquals(userRepository.getById(userDto.getId()), MapperUser.dtoToUser(userDto));

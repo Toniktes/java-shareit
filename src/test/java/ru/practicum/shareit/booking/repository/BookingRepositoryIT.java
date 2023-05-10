@@ -48,26 +48,27 @@ class BookingRepositoryIT {
         user.setEmail("yan@mail.ru");
         user = userRepository.save(user);
 
-        itemRequest = itemRequestRepository.save(ItemRequest.builder()
-                .description("des")
-                .requestor(user.getId())
-                .created(LocalDateTime.now())
-                .build());
-        item = itemRepository.save(Item.builder()
-                .name("name")
-                .description("des")
-                .available(true)
-                .owner(user.getId())
-                .requestId(itemRequest.getId())
-                .build()
-        );
-        booking = bookingRepository.save(Booking.builder()
-                .start(LocalDateTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS))
-                .end(LocalDateTime.now().plusHours(2).truncatedTo(ChronoUnit.SECONDS))
-                .bookerId(user.getId())
-                .itemId(item.getId())
-                .status(BookingStatus.WAITING)
-                .build());
+        itemRequest = new ItemRequest();
+        itemRequest.setDescription("des");
+        itemRequest.setRequestor(user.getId());
+        itemRequest.setCreated(LocalDateTime.now());
+        itemRequestRepository.save(itemRequest);
+
+        item = new Item();
+        item.setName("name");
+        item.setDescription("des");
+        item.setAvailable(true);
+        item.setOwner(user.getId());
+        item.setRequestId(itemRequest.getId());
+        itemRepository.save(item);
+
+        booking = new Booking();
+        booking.setStart(LocalDateTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS));
+        booking.setEnd(LocalDateTime.now().plusHours(2).truncatedTo(ChronoUnit.SECONDS));
+        booking.setBookerId(user.getId());
+        booking.setItemId(user.getId());
+        booking.setStatus(BookingStatus.WAITING);
+        bookingRepository.save(booking);
     }
 
     @AfterEach

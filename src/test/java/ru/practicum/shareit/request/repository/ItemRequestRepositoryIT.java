@@ -40,11 +40,11 @@ class ItemRequestRepositoryIT {
         user.setEmail("yan@mail.ru");
         user = userRepository.save(user);
 
-        itemRequest = itemRequestRepository.save(ItemRequest.builder()
-                .description("des")
-                .requestor(user.getId())
-                .created(LocalDateTime.now())
-                .build());
+        itemRequest = new ItemRequest();
+        itemRequest.setDescription("des");
+        itemRequest.setRequestor(user.getId());
+        itemRequest.setCreated(LocalDateTime.now());
+        itemRequestRepository.save(itemRequest);
     }
 
     @AfterEach

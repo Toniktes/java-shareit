@@ -21,18 +21,17 @@ class MapperItemRequestTest {
 
     @BeforeEach
     public void setUp() {
-        itemRequest = ItemRequest.builder()
-                .id(1)
-                .description("des")
-                .requestor(1)
-                .created(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS))
-                .build();
-        itemRequestDto = ItemRequestDto.builder()
-                .id(1)
-                .description("des")
-                .created(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS))
-                .items(null)
-                .build();
+        itemRequest = new ItemRequest();
+        itemRequest.setId(1);
+        itemRequest.setDescription("des");
+        itemRequest.setRequestor(1);
+        itemRequest.setCreated(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+
+        itemRequestDto = new ItemRequestDto();
+        itemRequestDto.setId(1);
+        itemRequestDto.setDescription("des");
+        itemRequestDto.setCreated(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+        itemRequestDto.setItems(null);
     }
 
     @Test

@@ -9,8 +9,8 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode
-@Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class ItemDtoWithBooking {
     private long id;
     private String name;

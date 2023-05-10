@@ -56,19 +56,19 @@ class ItemRequestServiceImplIT {
         user.setEmail("yan@mail.ru");
         user = userRepository.save(user);
 
-        itemRequest = itemRequestRepository.save(ItemRequest.builder()
-                .description("des")
-                .requestor(user.getId())
-                .created(LocalDateTime.now())
-                .build());
-        item = itemRepository.save(Item.builder()
-                .name("name")
-                .description("des")
-                .available(true)
-                .owner(user.getId())
-                .requestId(itemRequest.getId())
-                .build()
-        );
+        itemRequest = new ItemRequest();
+        itemRequest.setDescription("des");
+        itemRequest.setRequestor(user.getId());
+        itemRequest.setCreated(LocalDateTime.now());
+        itemRequestRepository.save(itemRequest);
+
+        item = new Item();
+        item.setName("name");
+        item.setDescription("des");
+        item.setAvailable(true);
+        item.setOwner(user.getId());
+        item.setRequestId(itemRequest.getId());
+        itemRepository.save(item);
     }
 
     @AfterEach
@@ -88,10 +88,9 @@ class ItemRequestServiceImplIT {
 
     @Test
     void addItemRequest_whenNotValidDescriptionIsNull_thenSaveAndReturn() {
-        itemRequest = ItemRequest.builder()
-                .requestor(user.getId())
-                .created(LocalDateTime.now())
-                .build();
+        itemRequest = new ItemRequest();
+        itemRequest.setRequestor(user.getId());
+        itemRequest.setCreated(LocalDateTime.now());
 
         assertThrows(ValidationException.class, () -> itemRequestService.addItemRequest(itemRequest, user.getId()));
     }

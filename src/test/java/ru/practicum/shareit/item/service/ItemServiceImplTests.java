@@ -67,41 +67,44 @@ class ItemServiceImplTests {
         user2.setEmail("yan2@mail.ru");
         user2 = userRepository.save(user2);
 
-        itemRequest = itemRequestRepository.save(ItemRequest.builder()
-                .description("des")
-                .requestor(user.getId())
-                .created(LocalDateTime.now())
-                .build());
-        item = itemRepository.save(Item.builder()
-                .name("name")
-                .description("des")
-                .available(true)
-                .owner(user.getId())
-                .requestId(itemRequest.getId())
-                .build());
-        itemDto = ItemDto.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .description(item.getDescription())
-                .available(item.getAvailable())
-                .requestId(itemRequest.getId())
-                .build();
-        itemDtoWithBooking = ItemDtoWithBooking.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .description(item.getDescription())
-                .available(item.getAvailable())
-                .lastBooking(null)
-                .nextBooking(null)
-                .comments(Collections.emptyList())
-                .build();
-        booking = bookingRepository.save(Booking.builder()
-                .start(LocalDateTime.now().minusHours(2).truncatedTo(ChronoUnit.MINUTES))
-                .end(LocalDateTime.now().minusHours(1).truncatedTo(ChronoUnit.MINUTES))
-                .bookerId(user.getId())
-                .itemId(item.getId())
-                .status(BookingStatus.APPROVED)
-                .build());
+        itemRequest = new ItemRequest();
+        itemRequest.setDescription("des");
+        itemRequest.setRequestor(user.getId());
+        itemRequest.setCreated(LocalDateTime.now());
+        itemRequestRepository.save(itemRequest);
+
+        item = new Item();
+        item.setName("name");
+        item.setDescription("des");
+        item.setAvailable(true);
+        item.setOwner(user.getId());
+        item.setRequestId(itemRequest.getId());
+        itemRepository.save(item);
+
+        itemDto = new ItemDto();
+        itemDto.setId(item.getId());
+        itemDto.setName(item.getName());
+        itemDto.setDescription(item.getDescription());
+        itemDto.setAvailable(item.getAvailable());
+        itemDto.setRequestId(itemRequest.getId());
+
+        itemDtoWithBooking = new ItemDtoWithBooking();
+        itemDtoWithBooking.setId(item.getId());
+        itemDtoWithBooking.setName(item.getName());
+        itemDtoWithBooking.setDescription(item.getDescription());
+        itemDtoWithBooking.setAvailable(item.getAvailable());
+        itemDtoWithBooking.setLastBooking(null);
+        itemDtoWithBooking.setNextBooking(null);
+        itemDtoWithBooking.setComments(Collections.emptyList());
+
+        booking = new Booking();
+        booking.setStart(LocalDateTime.now().minusHours(2).truncatedTo(ChronoUnit.MINUTES));
+        booking.setEnd(LocalDateTime.now().minusHours(1).truncatedTo(ChronoUnit.MINUTES));
+        booking.setBookerId(user.getId());
+        booking.setItemId(item.getId());
+        booking.setStatus(BookingStatus.APPROVED);
+        bookingRepository.save(booking);
+
         comment = new Comment();
         comment.setText("text");
 

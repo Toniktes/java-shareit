@@ -10,7 +10,7 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode
 @AllArgsConstructor
-@Builder
+@NoArgsConstructor
 public class ItemRequestDto {
     private long id;
     private String description;
