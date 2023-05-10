@@ -238,7 +238,7 @@
 				</plugins>
 			</reporting>
 		</profile>
-		<profile>
+<!--		<profile>
 			<id>coverage</id>
 			<build>
 				<plugins>
@@ -248,7 +248,7 @@
 					</plugin>
 				</plugins>
 			</build>
-		</profile>
+		</profile>-->
 	</profiles>
 
 </project>
