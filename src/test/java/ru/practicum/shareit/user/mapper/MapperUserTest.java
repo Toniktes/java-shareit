@@ -19,11 +19,11 @@ class MapperUserTest {
 
     @BeforeEach
     public void setUp() {
-        user = User.builder()
-                .id(1)
-                .name("name")
-                .email("yan@mail.ru")
-                .build();
+        user = new User();
+        user.setId(1);
+        user.setName("name");
+        user.setEmail("yan@mail.ru");
+
         userDto = new UserDto(
                 1,
                 "name",

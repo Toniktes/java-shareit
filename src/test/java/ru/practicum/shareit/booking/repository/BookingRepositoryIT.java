@@ -43,10 +43,11 @@ class BookingRepositoryIT {
 
     @BeforeEach
     public void beforeEach() {
-        user = userRepository.save(User.builder()
-                .name("name")
-                .email("yan@mail.ru")
-                .build());
+        user = new User();
+        user.setName("name");
+        user.setEmail("yan@mail.ru");
+        user = userRepository.save(user);
+
         itemRequest = itemRequestRepository.save(ItemRequest.builder()
                 .description("des")
                 .requestor(user.getId())

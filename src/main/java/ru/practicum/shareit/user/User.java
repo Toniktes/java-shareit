@@ -9,7 +9,6 @@ import javax.persistence.*;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Entity
 @Table(name = "users")
 public class User {
@@ -20,4 +19,5 @@ public class User {
     private String name;
     @Column(name = "email", nullable = false, length = 512, unique = true)
     private String email;
+
 }

@@ -53,14 +53,16 @@ class BookingServiceImplTests {
 
     @BeforeEach
     public void setUp() {
-        user = userRepository.save(User.builder()
-                .name("name")
-                .email("yan@mail.ru")
-                .build());
-        user2 = userRepository.save(User.builder()
-                .name("name2")
-                .email("yan2@mail.ru")
-                .build());
+        user = new User();
+        user.setName("name");
+        user.setEmail("yan@mail.ru");
+        user = userRepository.save(user);
+
+        user2 = new User();
+        user2.setName("name2");
+        user2.setEmail("yan2@mail.ru");
+        user2 = userRepository.save(user2);
+
         itemRequest = itemRequestRepository.save(ItemRequest.builder()
                 .description("des")
                 .requestor(user.getId())
