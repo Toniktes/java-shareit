@@ -44,18 +44,18 @@ public class BookingController {
     @GetMapping
     public List<BookingDtoResponse> getBookingListByUser(@RequestParam(required = false, defaultValue = "ALL") String state,
                                                          @RequestHeader("X-Sharer-User-Id") long userId,
-                                                         @RequestParam(defaultValue = "0") @Min(0) String from,
-                                                         @RequestParam(defaultValue = "20") @Min(1) String size) {
+                                                         @RequestParam(defaultValue = "0") @Min(0) int from,
+                                                         @RequestParam(defaultValue = "20") @Min(1) int size) {
         log.debug("received a request to getBookingList");
-        return bookingService.getBookingListByUser(state, userId, PageRequest.of(Integer.parseInt(from), Integer.parseInt(size)));
+        return bookingService.getBookingListByUser(state, userId, PageRequest.of(from, size));
     }
 
     @GetMapping("/owner")
     public List<BookingDtoResponse> getBookingListForThingsUser(@RequestParam(required = false, defaultValue = "ALL") String state,
                                                                 @RequestHeader("X-Sharer-User-Id") long userId,
-                                                                @RequestParam(defaultValue = "0") @Min(0) String from,
-                                                                @RequestParam(defaultValue = "20") @Min(1) String size) {
-        return bookingService.getBookingListForThingsUser(state, userId, PageRequest.of(Integer.parseInt(from), Integer.parseInt(size)));
+                                                                @RequestParam(defaultValue = "0") @Min(0) int from,
+                                                                @RequestParam(defaultValue = "20") @Min(1) int size) {
+        return bookingService.getBookingListForThingsUser(state, userId, PageRequest.of(from, size));
     }
 
 }

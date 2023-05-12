@@ -15,6 +15,7 @@ import ru.practicum.shareit.booking.mapper.MapperBooking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -22,6 +23,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -151,35 +153,35 @@ public class BookingServiceImpl implements BookingService {
 
             switch (resultState) {
                 case ALL:
-                    return mapAndSortedWithStart(getPage(userId, pageable).getContent().stream());
+                    return mapAndSortedForThingsUser(getPage(userId, pageable).getContent().stream(), userId);
 
                 case FUTURE:
-                    return mapAndSortedWithStart(getPage(userId, pageable).getContent()
+                    return mapAndSortedForThingsUser(getPage(userId, pageable).getContent()
                             .stream()
                             .filter(x -> x.getStatus() == BookingStatus.WAITING
-                                    || x.getStatus() == BookingStatus.APPROVED));
+                                    || x.getStatus() == BookingStatus.APPROVED), userId);
 
                 case WAITING:
-                    return mapAndSortedWithStart(getPage(userId, pageable).getContent()
+                    return mapAndSortedForThingsUser(getPage(userId, pageable).getContent()
                             .stream()
-                            .filter(x -> x.getStatus() == BookingStatus.WAITING));
+                            .filter(x -> x.getStatus() == BookingStatus.WAITING), userId);
 
                 case REJECTED:
-                    return mapAndSortedWithStart(getPage(userId, pageable).getContent()
+                    return mapAndSortedForThingsUser(getPage(userId, pageable).getContent()
                             .stream()
-                            .filter(x -> x.getStatus() == BookingStatus.REJECTED));
+                            .filter(x -> x.getStatus() == BookingStatus.REJECTED), userId);
 
                 case CURRENT:
-                    return mapAndSortedWithStart(getPage(userId, pageable).getContent()
+                    return mapAndSortedForThingsUser(getPage(userId, pageable).getContent()
                             .stream()
                             .filter(x -> x.getStatus() == BookingStatus.REJECTED || x.getStatus() == BookingStatus.APPROVED)
-                            .filter(x -> x.getEnd().isAfter(LocalDateTime.now()) && x.getStart().isBefore(LocalDateTime.now())));
+                            .filter(x -> x.getEnd().isAfter(LocalDateTime.now()) && x.getStart().isBefore(LocalDateTime.now())), userId);
 
                 case PAST:
-                    return mapAndSortedWithStart(getPage(userId, pageable).getContent()
+                    return mapAndSortedForThingsUser(getPage(userId, pageable).getContent()
                             .stream()
                             .filter(x -> x.getStatus() == BookingStatus.APPROVED)
-                            .filter(x -> x.getEnd().isBefore(LocalDateTime.now()) && x.getStart().isBefore(LocalDateTime.now())));
+                            .filter(x -> x.getEnd().isBefore(LocalDateTime.now()) && x.getStart().isBefore(LocalDateTime.now())), userId);
 
                 default:
                     throw new ValidationException("Unknown state: UNSUPPORTED_STATUS");
@@ -195,9 +197,12 @@ public class BookingServiceImpl implements BookingService {
         return bookingRepository.findAllByItemIdInOrderByStartDesc(list, pageable);
     }
 
-    private List<BookingDtoResponse> mapAndSortedWithStart(Stream<Booking> stream) {
+    private List<BookingDtoResponse> mapAndSortedForThingsUser(Stream<Booking> stream, long userId) {
+        Map<Long, Item> items = itemRepository.findAllByOwner(userId)
+                .stream()
+                .collect(Collectors.toMap(Item::getId, item -> item));
         return stream
-                .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
+                .map(x -> mapperBooking.bookingToDtoResponse(x, items.get(x.getItemId())))
                 .collect(Collectors.toList());
     }
 

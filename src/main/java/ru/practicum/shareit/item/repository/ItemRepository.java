@@ -24,4 +24,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "WHERE it.owner = :userId", nativeQuery = true)
     List<Long> getListItemIdByUser(long userId);
 
+    List<Item> findAllByOwner(long userId);
+
 }

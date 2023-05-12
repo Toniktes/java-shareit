@@ -31,10 +31,10 @@ public class ItemRequestController {
     }
 
     @GetMapping("/all")
-    public List<ItemRequestDto> getRequestsList(@RequestParam(defaultValue = "0") String from, @RequestParam(defaultValue = "20") String size,
+    public List<ItemRequestDto> getRequestsList(@RequestParam(defaultValue = "0") int from, @RequestParam(defaultValue = "20") int size,
                                                 @RequestHeader("X-Sharer-User-Id") long userId) {
         log.debug("received a request to get getRequestsList");
-        return itemRequestService.getRequestsList(PageRequest.of(Integer.parseInt(from), Integer.parseInt(size)), userId);
+        return itemRequestService.getRequestsList(PageRequest.of(from, size), userId);
     }
 
     @GetMapping("/{requestId}")

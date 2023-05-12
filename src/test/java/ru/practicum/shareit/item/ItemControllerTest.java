@@ -129,7 +129,7 @@ class ItemControllerTest {
         mockMvc.perform(get("/items")
                         .header("X-Sharer-User-Id", 1))
                 .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(itemController.getListOfThings(1, "0", "20"))));
+                .andExpect(content().json(mapper.writeValueAsString(itemController.getListOfThings(1, 0, 20))));
     }
 
     @SneakyThrows
@@ -142,7 +142,7 @@ class ItemControllerTest {
         mockMvc.perform(get("/items/search")
                         .param("text", "text"))
                 .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(itemController.searchThing("text", "0", "20"))));
+                .andExpect(content().json(mapper.writeValueAsString(itemController.searchThing("text", 0, 20))));
     }
 
     @SneakyThrows

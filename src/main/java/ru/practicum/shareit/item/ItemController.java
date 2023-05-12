@@ -39,19 +39,19 @@ public class ItemController {
 
     @GetMapping
     public List<ItemDtoWithBooking> getListOfThings(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                    @RequestParam(defaultValue = "0") String from,
-                                                    @RequestParam(defaultValue = "20") String size) {
+                                                    @RequestParam(defaultValue = "0") int from,
+                                                    @RequestParam(defaultValue = "20") int size) {
         log.debug("received a request to get list of things for userId: {}", userId);
-        return itemService.getListOfThings(userId, PageRequest.of(Integer.parseInt(from), Integer.parseInt(size)));
+        return itemService.getListOfThings(userId, PageRequest.of(from, size));
 
     }
 
     @GetMapping("/search")
     public List<ItemDto> searchThing(@RequestParam String text,
-                                     @RequestParam(defaultValue = "0") String from,
-                                     @RequestParam(defaultValue = "20") String size) {
+                                     @RequestParam(defaultValue = "0") int from,
+                                     @RequestParam(defaultValue = "20") int size) {
         log.debug("received a request to search a thing by text: {}", text);
-        return itemService.getThingsForSearch(text, PageRequest.of(Integer.parseInt(from), Integer.parseInt(size)));
+        return itemService.getThingsForSearch(text, PageRequest.of(from, size));
     }
 
     @PostMapping("/{itemId}/comment")
