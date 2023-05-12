@@ -123,7 +123,7 @@ class ItemControllerTest {
                 null
         );
         List<ItemDtoWithBooking> listItems = List.of(itemInfo);
-        Mockito.when(itemService.getListOfThings(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString()))
+        Mockito.when(itemService.getListOfThings(Mockito.anyLong(), Mockito.any()))
                 .thenReturn(listItems);
 
         mockMvc.perform(get("/items")
@@ -136,7 +136,7 @@ class ItemControllerTest {
     @Test
     void searchThing() {
         List<ItemDto> itemDtos = List.of(itemDto);
-        Mockito.when(itemService.getThingsForSearch(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+        Mockito.when(itemService.getThingsForSearch(Mockito.anyString(), Mockito.any()))
                 .thenReturn(itemDtos);
 
         mockMvc.perform(get("/items/search")

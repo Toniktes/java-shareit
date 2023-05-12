@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
@@ -121,21 +122,15 @@ class ItemRequestServiceImplIT {
         itemRequestDto.setItems(itemDtos);
         List<ItemRequestDto> list = List.of(itemRequestDto);
 
-        List<ItemRequestDto> itemRequestDtoList = itemRequestService.getRequestsList("0", "20",
+        List<ItemRequestDto> itemRequestDtoList = itemRequestService.getRequestsList(PageRequest.of(0, 20),
                 user.getId() + 1);
 
         assertEquals(list, itemRequestDtoList);
     }
 
     @Test
-    void getRequestsList_whenNotValidParameters_thenThrowsException() {
-        assertThrows(ValidationException.class, () -> itemRequestService.getRequestsList("a", "b",
-                user.getId() + 1));
-    }
-
-    @Test
     void getRequestsList_whenParametersIsNegative_thenThrowsException() {
-        assertThrows(ValidationException.class, () -> itemRequestService.getRequestsList("-1", "-1",
+        assertThrows(IllegalArgumentException.class, () -> itemRequestService.getRequestsList(PageRequest.of(-1, -1),
                 user.getId() + 1));
     }
 

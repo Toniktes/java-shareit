@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
@@ -201,7 +202,8 @@ class ItemServiceImplTests {
 
     @Test
     void getListOfThings_whenInvoked_thenReturnListItems() {
-        List<ItemDtoWithBooking> getItemDtoWithBooking = itemService.getListOfThings(user.getId(), "0", "20");
+        List<ItemDtoWithBooking> getItemDtoWithBooking = itemService.getListOfThings(user.getId(),
+                PageRequest.of(0, 20));
         getItemDtoWithBooking.forEach(x -> x.setLastBooking(null));
 
         assertEquals(List.of(itemDtoWithBooking), getItemDtoWithBooking);
@@ -209,26 +211,23 @@ class ItemServiceImplTests {
 
     @Test
     void getThingsForSearch_whenInvoked_thenReturnListItemsForSearch() {
-        List<ItemDto> getThingsForSearch = itemService.getThingsForSearch("name", "0", "20");
+        List<ItemDto> getThingsForSearch = itemService.getThingsForSearch("name",
+                PageRequest.of(0, 20));
 
         assertEquals(List.of(itemDto), getThingsForSearch);
     }
 
     @Test
     void getThingsForSearch_whenEmptyText_thenReturnEmptyList() {
-        List<ItemDto> getThingsForSearch = itemService.getThingsForSearch("", "0", "20");
+        List<ItemDto> getThingsForSearch = itemService.getThingsForSearch("",
+                PageRequest.of(0, 20));
 
         assertEquals(Collections.emptyList(), getThingsForSearch);
     }
 
     @Test
-    void getThingsForSearch_whenNotValidParameters_thenThrowException() {
-        assertThrows(ValidationException.class, () -> itemService.getThingsForSearch("name", "a", "b"));
-    }
-
-    @Test
     void getThingsForSearch_whenNotParametersIsNegative_thenThrowException() {
-        assertThrows(ValidationException.class, () -> itemService.getThingsForSearch("name", "-1", "-1"));
+        assertThrows(IllegalArgumentException.class, () -> itemService.getThingsForSearch("name", PageRequest.of(-1, -1)));
     }
 
     @Test

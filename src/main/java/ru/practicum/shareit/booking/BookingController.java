@@ -2,12 +2,14 @@ package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoResponse;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 
@@ -42,18 +44,18 @@ public class BookingController {
     @GetMapping
     public List<BookingDtoResponse> getBookingListByUser(@RequestParam(required = false, defaultValue = "ALL") String state,
                                                          @RequestHeader("X-Sharer-User-Id") long userId,
-                                                         @RequestParam(defaultValue = "0") String from,
-                                                         @RequestParam(defaultValue = "20") String size) {
+                                                         @RequestParam(defaultValue = "0") @Min(0) String from,
+                                                         @RequestParam(defaultValue = "20") @Min(1) String size) {
         log.debug("received a request to getBookingList");
-        return bookingService.getBookingListByUser(state, userId, from, size);
+        return bookingService.getBookingListByUser(state, userId, PageRequest.of(Integer.parseInt(from), Integer.parseInt(size)));
     }
 
     @GetMapping("/owner")
     public List<BookingDtoResponse> getBookingListForThingsUser(@RequestParam(required = false, defaultValue = "ALL") String state,
                                                                 @RequestHeader("X-Sharer-User-Id") long userId,
-                                                                @RequestParam(defaultValue = "0") String from,
-                                                                @RequestParam(defaultValue = "20") String size) {
-        return bookingService.getBookingListForThingsUser(state, userId, from, size);
+                                                                @RequestParam(defaultValue = "0") @Min(0) String from,
+                                                                @RequestParam(defaultValue = "20") @Min(1) String size) {
+        return bookingService.getBookingListForThingsUser(state, userId, PageRequest.of(Integer.parseInt(from), Integer.parseInt(size)));
     }
 
 }

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
@@ -177,7 +178,7 @@ class BookingServiceImplTests {
     @Test
     void getBookingListByUser_whenStateAll_thenReturnListOfBookings() {
         List<BookingDtoResponse> bookingResponse = bookingService.getBookingListByUser("ALL",
-                user.getId(), "0", "20");
+                user.getId(), PageRequest.of(0, 20));
 
         assertEquals(bookingResponse.size(), 1);
     }
@@ -185,7 +186,7 @@ class BookingServiceImplTests {
     @Test
     void getBookingListByUser_whenStateFuture_thenReturnListOfBookings() {
         List<BookingDtoResponse> bookingResponse = bookingService.getBookingListByUser("FUTURE",
-                user.getId(), "0", "20");
+                user.getId(), PageRequest.of(0, 20));
 
         assertEquals(bookingResponse.size(), 1);
     }
@@ -193,7 +194,7 @@ class BookingServiceImplTests {
     @Test
     void getBookingListByUser_whenStateWaiting_thenReturnListOfBookings() {
         List<BookingDtoResponse> bookingResponse = bookingService.getBookingListByUser("WAITING",
-                user.getId(), "0", "20");
+                user.getId(), PageRequest.of(0, 20));
 
         assertEquals(bookingResponse.size(), 1);
     }
@@ -203,7 +204,7 @@ class BookingServiceImplTests {
         booking.setStatus(BookingStatus.REJECTED);
         bookingRepository.save(booking);
         List<BookingDtoResponse> bookingResponse = bookingService.getBookingListByUser("REJECTED",
-                user.getId(), "0", "20");
+                user.getId(), PageRequest.of(0, 20));
 
         assertEquals(bookingResponse.size(), 1);
     }
@@ -214,7 +215,7 @@ class BookingServiceImplTests {
         booking.setStart(LocalDateTime.now().minusHours(1));
         bookingRepository.save(booking);
         List<BookingDtoResponse> bookingResponse = bookingService.getBookingListByUser("CURRENT",
-                user.getId(), "0", "20");
+                user.getId(), PageRequest.of(0, 20));
 
         assertEquals(bookingResponse.size(), 1);
     }
@@ -226,7 +227,7 @@ class BookingServiceImplTests {
         booking.setStart(LocalDateTime.now().minusHours(2));
         bookingRepository.save(booking);
         List<BookingDtoResponse> bookingResponse = bookingService.getBookingListByUser("PAST",
-                user.getId(), "0", "20");
+                user.getId(), PageRequest.of(0, 20));
 
         assertEquals(bookingResponse.size(), 1);
     }
@@ -234,13 +235,13 @@ class BookingServiceImplTests {
     @Test
     void getBookingListByUser_whenStateUnsupported_thenReturnListOfBookings() {
         assertThrows(ValidationException.class, () -> bookingService.getBookingListByUser("Unknown",
-                user.getId(), "0", "20"));
+                user.getId(), PageRequest.of(0, 20)));
     }
 
     @Test
     void getBookingListForThingsUser_whenStateAll_thenReturnListOfBookings() {
         List<BookingDtoResponse> bookingResponse = bookingService.getBookingListForThingsUser("ALL",
-                user.getId(), "0", "20");
+                user.getId(), PageRequest.of(0, 20));
 
         assertEquals(bookingResponse.size(), 1);
     }
@@ -248,7 +249,7 @@ class BookingServiceImplTests {
     @Test
     void getBookingListForThingsUser_whenStateFuture_thenReturnListOfBookings() {
         List<BookingDtoResponse> bookingResponse = bookingService.getBookingListForThingsUser("FUTURE",
-                user.getId(), "0", "20");
+                user.getId(), PageRequest.of(0, 20));
 
         assertEquals(bookingResponse.size(), 1);
     }
@@ -258,7 +259,7 @@ class BookingServiceImplTests {
         booking.setStatus(BookingStatus.APPROVED);
         bookingRepository.save(booking);
         List<BookingDtoResponse> bookingResponse = bookingService.getBookingListForThingsUser("FUTURE",
-                user.getId(), "0", "20");
+                user.getId(), PageRequest.of(0, 20));
 
         assertEquals(bookingResponse.size(), 1);
     }
@@ -266,7 +267,7 @@ class BookingServiceImplTests {
     @Test
     void getBookingListForThingsUser_whenStateWaiting_thenReturnListOfBookings() {
         List<BookingDtoResponse> bookingResponse = bookingService.getBookingListForThingsUser("WAITING",
-                user.getId(), "0", "20");
+                user.getId(), PageRequest.of(0, 20));
 
         assertEquals(bookingResponse.size(), 1);
     }
@@ -277,7 +278,7 @@ class BookingServiceImplTests {
         booking.setStart(LocalDateTime.now().minusHours(1));
         bookingRepository.save(booking);
         List<BookingDtoResponse> bookingResponse = bookingService.getBookingListForThingsUser("REJECTED",
-                user.getId(), "0", "20");
+                user.getId(), PageRequest.of(0, 20));
 
         assertEquals(bookingResponse.size(), 1);
     }
@@ -288,7 +289,7 @@ class BookingServiceImplTests {
         booking.setStart(LocalDateTime.now().minusHours(1));
         bookingRepository.save(booking);
         List<BookingDtoResponse> bookingResponse = bookingService.getBookingListForThingsUser("CURRENT",
-                user.getId(), "0", "20");
+                user.getId(), PageRequest.of(0, 20));
 
         assertEquals(bookingResponse.size(), 1);
     }
@@ -300,7 +301,7 @@ class BookingServiceImplTests {
         booking.setStart(LocalDateTime.now().minusHours(2));
         bookingRepository.save(booking);
         List<BookingDtoResponse> bookingResponse = bookingService.getBookingListForThingsUser("PAST",
-                user.getId(), "0", "20");
+                user.getId(), PageRequest.of(0, 20));
 
         assertEquals(bookingResponse.size(), 1);
     }
@@ -308,18 +309,12 @@ class BookingServiceImplTests {
     @Test
     void getBookingListForThingsUser_whenStateUnknown_thenThrowException() {
         assertThrows(ValidationException.class, () -> bookingService.getBookingListForThingsUser("Unknown",
-                user.getId(), "0", "20"));
-    }
-
-    @Test
-    void getBookingListForThingsUser_whenNotValidPageParam_thenThrowException() {
-        assertThrows(ValidationException.class, () -> bookingService.getBookingListForThingsUser("All",
-                user.getId(), "d", "d"));
+                user.getId(), PageRequest.of(0, 20)));
     }
 
     @Test
     void getBookingListForThingsUser_whenPageParamIsNegative_thenThrowException() {
-        assertThrows(ValidationException.class, () -> bookingService.getBookingListForThingsUser("All",
-                user.getId(), "-1", "-1"));
+        assertThrows(IllegalArgumentException.class, () -> bookingService.getBookingListForThingsUser("All",
+                user.getId(), PageRequest.of(-1, -1)));
     }
 }

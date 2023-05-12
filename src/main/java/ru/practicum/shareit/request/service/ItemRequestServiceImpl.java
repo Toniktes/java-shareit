@@ -1,7 +1,7 @@
 package ru.practicum.shareit.request.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -61,10 +61,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemRequestDto> getRequestsList(String from, String size, long userId) {
-        validatePageParameters(from, size);
-        List<ItemRequestDto> itemRequestDtos = itemRequestRepository.findAllByIdIsNot(userId,
-                        PageRequest.of(Integer.parseInt(from), Integer.parseInt(size)))
+    public List<ItemRequestDto> getRequestsList(Pageable pageable, long userId) {
+        validatePageParameters(pageable);
+        List<ItemRequestDto> itemRequestDtos = itemRequestRepository.findAllByIdIsNot(userId, pageable)
                 .getContent()
                 .stream()
                 .map(MapperItemRequest::toDto)
@@ -90,10 +89,12 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Transactional(readOnly = true)
     @Override
     public ItemRequestDto getRequestById(long userId, long requestId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("not found user with id: " + userId));
-        itemRequestRepository.findById(requestId)
-                .orElseThrow(() -> new NotFoundException("not found request with id: " + requestId));
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("not found user with id: " + userId);
+        }
+        if (!itemRequestRepository.existsById(requestId)) {
+            throw new NotFoundException("not found request with id: " + requestId);
+        }
 
         List<Item> items = itemRepository.findAllByRequestId(requestId);
         List<ItemDto> itemDtos = items.stream().map(MapperItem::itemToDto).collect(Collectors.toList());
@@ -111,16 +112,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 .orElseThrow(() -> new NotFoundException("not found user with id: " + userId));
     }
 
-    private void validatePageParameters(String from, String size) {
-        int parseFrom;
-        int parseSize;
-        try {
-            parseFrom = Integer.parseInt(from);
-            parseSize = Integer.parseInt(size);
-        } catch (NumberFormatException e) {
-            throw new ValidationException("from or size not a number");
-        }
-        if (parseFrom < 0 || parseSize <= 0) {
+    private void validatePageParameters(Pageable pageable) {
+        if (pageable.getPageNumber() < 0 || pageable.getPageSize() <= 0) {
             throw new ValidationException("from can't be < 0 and size can't be <= 0");
         }
     }

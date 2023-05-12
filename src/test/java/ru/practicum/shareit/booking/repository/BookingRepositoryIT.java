@@ -82,7 +82,7 @@ class BookingRepositoryIT {
     @Test
     void findAllByBookerIdAllState() {
         List<Booking> list = List.of(booking);
-        Page<Booking> page = bookingRepository.findAllByBookerIdAllState(booking.getBookerId(),
+        Page<Booking> page = bookingRepository.findAllByBookerIdOrderByEndDesc(booking.getBookerId(),
                 PageRequest.of(0, 20));
 
         assertEquals(list, page.getContent());
@@ -92,9 +92,9 @@ class BookingRepositoryIT {
     @Test
     void findAllByItemId() {
         List<Booking> list = List.of(booking);
-        List<Booking> actualBooking = bookingRepository.findAllByItemId(item.getId());
+        Page<Booking> actualBooking = bookingRepository.findAllByItemIdInOrderByStartDesc(List.of(item.getId()), PageRequest.of(0, 20));
 
-        assertEquals(list, actualBooking);
+        assertEquals(list, actualBooking.getContent());
     }
 
     @Test

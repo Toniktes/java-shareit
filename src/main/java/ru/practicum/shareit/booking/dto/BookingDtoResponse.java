@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@EqualsAndHashCode
 @AllArgsConstructor
 public class BookingDtoResponse {
     private long id;

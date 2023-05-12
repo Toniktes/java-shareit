@@ -95,7 +95,7 @@ class ItemRequestControllerTest {
     @SneakyThrows
     @Test
     void getRequestsList_whenInvoked_thenResponseStatusIsOkAndListItemRequestDtoInBody() {
-        when(itemRequestService.getRequestsList(anyString(), anyString(), anyLong()))
+        when(itemRequestService.getRequestsList(any(), anyLong()))
                 .thenReturn(List.of(itemRequestDto));
 
         mockMvc.perform(get("/requests/all")

@@ -2,6 +2,7 @@ package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
@@ -33,7 +34,7 @@ public class ItemRequestController {
     public List<ItemRequestDto> getRequestsList(@RequestParam(defaultValue = "0") String from, @RequestParam(defaultValue = "20") String size,
                                                 @RequestHeader("X-Sharer-User-Id") long userId) {
         log.debug("received a request to get getRequestsList");
-        return itemRequestService.getRequestsList(from, size, userId);
+        return itemRequestService.getRequestsList(PageRequest.of(Integer.parseInt(from), Integer.parseInt(size)), userId);
     }
 
     @GetMapping("/{requestId}")

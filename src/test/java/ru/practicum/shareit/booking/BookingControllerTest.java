@@ -127,7 +127,7 @@ class BookingControllerTest {
     @Test
     void getBookingListByUser() {
         List<BookingDtoResponse> listBooking = List.of(bookingDtoResponse);
-        when(bookingService.getBookingListByUser(anyString(), anyLong(), anyString(), anyString()))
+        when(bookingService.getBookingListByUser(anyString(), anyLong(), any()))
                 .thenReturn(listBooking);
 
         mockMvc.perform(get("/bookings")
@@ -143,7 +143,7 @@ class BookingControllerTest {
     @Test
     void getBookingListForThingsUser() {
         List<BookingDtoResponse> listBooking = List.of(bookingDtoResponse);
-        when(bookingService.getBookingListForThingsUser(anyString(), anyLong(), anyString(), anyString()))
+        when(bookingService.getBookingListForThingsUser(anyString(), anyLong(), any()))
                 .thenReturn(listBooking);
 
         mockMvc.perform(get("/bookings/owner")

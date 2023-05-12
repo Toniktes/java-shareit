@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
@@ -41,7 +42,7 @@ public class ItemController {
                                                     @RequestParam(defaultValue = "0") String from,
                                                     @RequestParam(defaultValue = "20") String size) {
         log.debug("received a request to get list of things for userId: {}", userId);
-        return itemService.getListOfThings(userId, from, size);
+        return itemService.getListOfThings(userId, PageRequest.of(Integer.parseInt(from), Integer.parseInt(size)));
 
     }
 
@@ -50,7 +51,7 @@ public class ItemController {
                                      @RequestParam(defaultValue = "0") String from,
                                      @RequestParam(defaultValue = "20") String size) {
         log.debug("received a request to search a thing by text: {}", text);
-        return itemService.getThingsForSearch(text, from, size);
+        return itemService.getThingsForSearch(text, PageRequest.of(Integer.parseInt(from), Integer.parseInt(size)));
     }
 
     @PostMapping("/{itemId}/comment")
