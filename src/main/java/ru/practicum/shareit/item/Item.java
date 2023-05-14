@@ -1,12 +1,11 @@
 package ru.practicum.shareit.item;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -24,7 +23,7 @@ public class Item {
     private Boolean available;
     @Column(name = "owner", nullable = false)
     private long owner;
-    @Column
-    private long request;
+    @Column(name = "request_id")
+    private long requestId;
 
 }

@@ -26,7 +26,8 @@ public class MapperItem {
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
                 userId,
-                0);
+                itemDto.getRequestId()
+        );
     }
 
     public static ItemDto itemToDto(Item item) {
@@ -34,7 +35,8 @@ public class MapperItem {
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
-                item.getAvailable()
+                item.getAvailable(),
+                item.getRequestId()
         );
     }
 

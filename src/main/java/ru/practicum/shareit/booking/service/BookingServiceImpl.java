@@ -1,6 +1,9 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -18,9 +21,9 @@ import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -49,7 +52,7 @@ public class BookingServiceImpl implements BookingService {
         itemRepository.findById(bookingDto.getItemId())
                 .orElseThrow(() -> new NotFoundException("not found item with id: " + bookingDto.getItemId()));
         if (itemRepository.getById(bookingDto.getItemId()).getOwner() == userId) {
-            throw new NotFoundException("kk");
+            throw new NotFoundException("user must be the owner");
         }
         if (!itemRepository.getById(bookingDto.getItemId()).getAvailable()) {
             throw new ValidationException("booking for item with id: " + bookingDto.getItemId() + " not available");
@@ -73,9 +76,6 @@ public class BookingServiceImpl implements BookingService {
             } else {
                 booking.setStatus(BookingStatus.REJECTED);
             }
-            if (booking.getBookerId() == 0) {
-                booking.setBookerId(bookingId);
-            }
             return mapperBooking.bookingToDtoResponse(bookingRepository.save(booking),
                     itemService.getItem(booking.getItemId()));
 
@@ -86,7 +86,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional(readOnly = true)
     @Override
-    public BookingDtoResponse getBooking(long bookingId, long userId) {
+    public BookingDtoResponse getBookingDtoResponse(long bookingId, long userId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("not found booking with id: " + bookingId));
         if (booking.getBookerId() == userId || itemService.getItem(booking.getItemId()).getOwner() == userId) {
@@ -104,38 +104,30 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<BookingDtoResponse> getBookingListByUser(String state, long userId) {
+    public List<BookingDtoResponse> getBookingListByUser(String state, long userId, Pageable pageable) {
         validateUser(userId);
+
         try {
             BookingState resultState = Enum.valueOf(BookingState.class, state);
-            Stream<BookingDtoResponse> result;
             switch (resultState) {
                 case ALL:
-                    return mapAndSorted(bookingRepository.findAllByBookerId(userId)
-                            .stream());
+                    return mapAndSorted(bookingRepository.findAllByBookerIdOrderByEndDesc(userId,
+                            PageRequest.of(pageable.getPageNumber() / pageable.getPageSize(), pageable.getPageSize())));
                 case FUTURE:
-                    return mapAndSorted(bookingRepository.findAllByBookerId(userId)
-                            .stream()
-                            .filter(x -> x.getStatus() == BookingStatus.WAITING || x.getStatus() == BookingStatus.APPROVED));
+                    return mapAndSorted(bookingRepository.getAllByBookerIdForFutureState(userId,
+                            pageable));
                 case WAITING:
-                    return mapAndSorted(bookingRepository.findAllByBookerId(userId)
-                            .stream()
-                            .filter(x -> x.getStatus() == BookingStatus.WAITING));
-
+                    return mapAndSorted(bookingRepository.getAllByBookerIdForWaitingState(userId,
+                            pageable));
                 case REJECTED:
-                    return mapAndSorted(bookingRepository.findAllByBookerId(userId)
-                            .stream()
-                            .filter(x -> x.getStatus() == BookingStatus.REJECTED));
+                    return mapAndSorted(bookingRepository.getAllByBookerIdForRejectedState(userId,
+                            pageable));
                 case CURRENT:
-                    return mapAndSorted(bookingRepository.findAllByBookerId(userId)
-                            .stream()
-                            .filter(x -> x.getStatus() == BookingStatus.REJECTED || x.getStatus() == BookingStatus.APPROVED)
-                            .filter(x -> x.getEnd().isAfter(LocalDateTime.now()) && x.getStart().isBefore(LocalDateTime.now())));
+                    return mapAndSorted(bookingRepository.getAllByBookerIdForCurrentState(userId,
+                            pageable));
                 case PAST:
-                    return mapAndSorted(bookingRepository.findAllByBookerId(userId)
-                            .stream()
-                            .filter(x -> x.getStatus() == BookingStatus.APPROVED)
-                            .filter(x -> x.getEnd().isBefore(LocalDateTime.now()) && x.getStart().isBefore(LocalDateTime.now())));
+                    return mapAndSorted(bookingRepository.getAllByBookerIdForPastState(userId,
+                            pageable));
                 default:
                     throw new ValidationException("Unknown state: UNSUPPORTED_STATUS");
             }
@@ -144,68 +136,53 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private List<BookingDtoResponse> mapAndSorted(Stream<Booking> stream) {
-        return stream
+    private List<BookingDtoResponse> mapAndSorted(Page<Booking> page) {
+        return page
+                .stream()
                 .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
-                .sorted(Comparator.comparing(BookingDtoResponse::getEnd).reversed())
+                .sorted(Comparator.comparing(BookingDtoResponse::getStart).reversed())
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<BookingDtoResponse> getBookingListForThingsUser(String state, long userId) {
+    public List<BookingDtoResponse> getBookingListForThingsUser(String state, long userId, Pageable pageable) {
         validateUser(userId);
         try {
             BookingState resultState = Enum.valueOf(BookingState.class, state);
-            List<Long> list;
-            List<Booking> bookings = new ArrayList<>();
+
             switch (resultState) {
                 case ALL:
-                    list = getListItemIdForUser(userId);
-                    for (Long ids : list) {
-                        bookings.addAll(bookingRepository.findAllByItemId(ids));
-                    }
-                    return mapAndSortedWithStart(bookings
-                            .stream());
+                    return mapAndSortedForThingsUser(getPage(userId, pageable).getContent().stream(), userId);
+
                 case FUTURE:
-                    list = getListItemIdForUser(userId);
-                    for (Long ids : list) {
-                        bookings.addAll(bookingRepository.findAllByItemId(ids));
-                    }
-                    return mapAndSortedWithStart(bookings
+                    return mapAndSortedForThingsUser(getPage(userId, pageable).getContent()
                             .stream()
                             .filter(x -> x.getStatus() == BookingStatus.WAITING
-                                    || x.getStatus() == BookingStatus.APPROVED));
+                                    || x.getStatus() == BookingStatus.APPROVED), userId);
+
                 case WAITING:
-                    list = getListItemIdForUser(userId);
-                    for (Long ids : list) {
-                        bookings.addAll(bookingRepository.findAllByItemId(ids));
-                    }
-                    return mapAndSortedWithStart(bookings.stream()
-                            .filter(x -> x.getStatus() == BookingStatus.WAITING));
+                    return mapAndSortedForThingsUser(getPage(userId, pageable).getContent()
+                            .stream()
+                            .filter(x -> x.getStatus() == BookingStatus.WAITING), userId);
+
                 case REJECTED:
-                    list = getListItemIdForUser(userId);
-                    for (Long ids : list) {
-                        bookings.addAll(bookingRepository.findAllByItemId(ids));
-                    }
-                    return mapAndSortedWithStart(bookings.stream()
-                            .filter(x -> x.getStatus() == BookingStatus.REJECTED));
+                    return mapAndSortedForThingsUser(getPage(userId, pageable).getContent()
+                            .stream()
+                            .filter(x -> x.getStatus() == BookingStatus.REJECTED), userId);
+
                 case CURRENT:
-                    list = getListItemIdForUser(userId);
-                    for (Long ids : list) {
-                        bookings.addAll(bookingRepository.findAllByItemId(ids));
-                    }
-                    return mapAndSortedWithStart(bookings.stream()
+                    return mapAndSortedForThingsUser(getPage(userId, pageable).getContent()
+                            .stream()
                             .filter(x -> x.getStatus() == BookingStatus.REJECTED || x.getStatus() == BookingStatus.APPROVED)
-                            .filter(x -> x.getEnd().isAfter(LocalDateTime.now()) && x.getStart().isBefore(LocalDateTime.now())));
+                            .filter(x -> x.getEnd().isAfter(LocalDateTime.now()) && x.getStart().isBefore(LocalDateTime.now())), userId);
+
                 case PAST:
-                    list = getListItemIdForUser(userId);
-                    for (Long ids : list) {
-                        bookings.addAll(bookingRepository.findAllByItemId(ids));
-                    }
-                    return mapAndSortedWithStart(bookings.stream()
+                    return mapAndSortedForThingsUser(getPage(userId, pageable).getContent()
+                            .stream()
                             .filter(x -> x.getStatus() == BookingStatus.APPROVED)
-                            .filter(x -> x.getEnd().isBefore(LocalDateTime.now()) && x.getStart().isBefore(LocalDateTime.now())));
+                            .filter(x -> x.getEnd().isBefore(LocalDateTime.now()) && x.getStart().isBefore(LocalDateTime.now())), userId);
+
                 default:
                     throw new ValidationException("Unknown state: UNSUPPORTED_STATUS");
             }
@@ -214,17 +191,18 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private List<Long> getListItemIdForUser(long userId) {
-        return itemRepository.findAllByOwner(userId)
-                .stream()
-                .map(Item::getId)
-                .collect(Collectors.toList());
+    private Page<Booking> getPage(long userId, Pageable pageable) {
+        List<Long> list = itemRepository.getListItemIdByUser(userId);
+
+        return bookingRepository.findAllByItemIdInOrderByStartDesc(list, pageable);
     }
 
-    private List<BookingDtoResponse> mapAndSortedWithStart(Stream<Booking> stream) {
+    private List<BookingDtoResponse> mapAndSortedForThingsUser(Stream<Booking> stream, long userId) {
+        Map<Long, Item> items = itemRepository.findAllByOwner(userId)
+                .stream()
+                .collect(Collectors.toMap(Item::getId, item -> item));
         return stream
-                .map(x -> mapperBooking.bookingToDtoResponse(x, itemService.getItem(x.getItemId())))
-                .sorted(Comparator.comparing(BookingDtoResponse::getStart).reversed())
+                .map(x -> mapperBooking.bookingToDtoResponse(x, items.get(x.getItemId())))
                 .collect(Collectors.toList());
     }
 

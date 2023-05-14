@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -94,8 +95,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemDtoWithBooking> getListOfThings(long userId) {
-        return itemRepository.findAllByOwner(userId)
+    public List<ItemDtoWithBooking> getListOfThings(long userId, Pageable pageable) {
+        return itemRepository.findAllByOwner(userId, pageable)
                 .stream()
                 .map(mapperItem::itemToDtoWithBooking)
                 .collect(Collectors.toList());
@@ -103,11 +104,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemDto> getThingsForSearch(String text) {
+    public List<ItemDto> getThingsForSearch(String text, Pageable pageable) {
         if (text == null || text.isEmpty()) {
             return List.of();
         }
-        return itemRepository.findAll()
+        return itemRepository.findAll(pageable)
                 .stream()
                 .filter(x -> x.getDescription().toLowerCase().contains(text.toLowerCase()) ||
                         x.getName().toLowerCase().contains(text.toLowerCase()))
