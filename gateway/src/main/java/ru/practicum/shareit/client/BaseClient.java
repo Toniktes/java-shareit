@@ -11,6 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingDtoResponse;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
 
 public class BaseClient {
     protected final RestTemplate rest;
@@ -19,7 +23,37 @@ public class BaseClient {
         this.rest = rest;
     }
 
-    protected ResponseEntity<Object> get(String path) {
+    protected <T> BookingDtoResponse post(String path, long userId, T body) {
+        return post(path, userId, body);
+    }
+
+    protected BookingDtoResponse patch(String path, long userId, String approved) {
+        return patch(path, userId, approved);
+    }
+
+    protected BookingDtoResponse get(String path, long userId) {
+        return get(path, userId);
+    }
+
+    protected List<BookingDtoResponse> get(String path, long userId, Map<String, Object> parameters) {
+        return get(path, userId, parameters);
+    }
+
+    protected ItemDto post(String path, ItemDto itemDto, long userId) {
+        return post(path, itemDto, userId);
+    }
+
+    protected ItemDto patch(String path, ItemDto itemDto, long userId) {
+        return patch(path, itemDto, userId);
+    }
+
+    protected ItemDtoWithBooking getItem(String path, long userId) {
+        return getItem(path, userId);
+    }
+
+
+
+/*    protected ResponseEntity<Object> get(String path) {
         return get(path, null, null);
     }
 
@@ -38,6 +72,7 @@ public class BaseClient {
     protected <T> ResponseEntity<Object> post(String path, long userId, T body) {
         return post(path, userId, null, body);
     }
+
 
     protected <T> ResponseEntity<Object> post(String path, Long userId, @Nullable Map<String, Object> parameters, T body) {
         return makeAndSendRequest(HttpMethod.POST, path, userId, parameters, body);
@@ -62,6 +97,7 @@ public class BaseClient {
     protected <T> ResponseEntity<Object> patch(String path, long userId, T body) {
         return patch(path, userId, null, body);
     }
+
 
     protected <T> ResponseEntity<Object> patch(String path, Long userId, @Nullable Map<String, Object> parameters, T body) {
         return makeAndSendRequest(HttpMethod.PATCH, path, userId, parameters, body);
@@ -117,5 +153,5 @@ public class BaseClient {
         }
 
         return responseBuilder.build();
-    }
+    }*/
 }
