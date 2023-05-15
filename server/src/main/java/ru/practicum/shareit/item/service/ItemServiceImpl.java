@@ -19,6 +19,7 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -97,8 +98,10 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDtoWithBooking> getListOfThings(long userId, Pageable pageable) {
         return itemRepository.findAllByOwner(userId, pageable)
+                .getContent()
                 .stream()
                 .map(mapperItem::itemToDtoWithBooking)
+                .sorted(Comparator.comparing(ItemDtoWithBooking::getId))
                 .collect(Collectors.toList());
     }
 
