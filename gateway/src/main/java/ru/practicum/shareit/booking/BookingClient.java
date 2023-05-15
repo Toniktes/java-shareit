@@ -4,14 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookingDtoResponse;
 import ru.practicum.shareit.client.BaseClient;
 
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -28,19 +27,22 @@ public class BookingClient extends BaseClient {
         );
     }
 
-    public BookingDtoResponse addBooking(BookingDto bookingDto, long userId) {
+    public ResponseEntity<Object> addBooking(BookingDto bookingDto, long userId) {
         return post("", userId, bookingDto);
     }
 
-    public BookingDtoResponse processTheRequest(long userId, long bookingId, String approved) {
-        return patch("/" + bookingId + "?approved={approved}", userId, approved);
+    public ResponseEntity<Object> processTheRequest(long userId, long bookingId, String approved) {
+        Map<String, Object> parameters = Map.of(
+                "approved", approved
+        );
+        return patch("/" + bookingId + "?approved={approved}", userId, parameters, null);
     }
 
-    public BookingDtoResponse getBooking(long bookingId, long userId) {
+    public ResponseEntity<Object> getBooking(long bookingId, long userId) {
         return get("/" + bookingId, userId);
     }
 
-    public List<BookingDtoResponse> getBookingListByUser(String state, long userId, Pageable pageable) {
+    public ResponseEntity<Object> getBookingListByUser(String state, long userId, Pageable pageable) {
         Map<String, Object> parameters = Map.of(
                 "state", state,
                 "from", pageable.getPageNumber(),
@@ -49,7 +51,7 @@ public class BookingClient extends BaseClient {
         return get("?state={state}&&from={from}&&size={size}", userId, parameters);
     }
 
-    public List<BookingDtoResponse> getBookingListForThingsUser(String state, long userId, Pageable pageable) {
+    public ResponseEntity<Object> getBookingListForThingsUser(String state, long userId, Pageable pageable) {
         Map<String, Object> parameters = Map.of(
                 "state", state,
                 "from", pageable.getPageNumber(),

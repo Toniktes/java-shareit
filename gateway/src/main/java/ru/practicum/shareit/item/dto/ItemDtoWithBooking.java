@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.*;
 import ru.practicum.shareit.booking.dto.LastAndNextBooking;
-import ru.practicum.shareit.item.Comment;
 
 import java.util.List;
 

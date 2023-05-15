@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.shareit.booking.BookingStatus;
 
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
@@ -25,6 +24,5 @@ public class BookingDto {
     LocalDateTime end;
     long booker;
     long itemId;
-    @Enumerated(EnumType.STRING)
     BookingStatus status;
 }
