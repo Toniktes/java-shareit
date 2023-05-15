@@ -1,24 +1,12 @@
 package ru.practicum.shareit.client;
 
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
-import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookingDtoResponse;
-import ru.practicum.shareit.item.dto.Comment;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemDtoWithBooking;
-import ru.practicum.shareit.request.dto.ItemRequest;
-import ru.practicum.shareit.request.dto.ItemRequestDto;
+
+import java.util.List;
+import java.util.Map;
 
 public class BaseClient {
     protected final RestTemplate rest;
@@ -126,61 +114,5 @@ public class BaseClient {
 
         return responseBuilder.build();
     }
-
-/*    protected BookingDtoResponse post(String path, long userId, BookingDto bookingDto) {
-        return post(path, userId, bookingDto);
-    }
-
-    protected BookingDtoResponse patch(String path, long userId, String approved) {
-        return patch(path, userId, approved);
-    }
-
-    protected BookingDtoResponse get(String path, long userId) {
-        return get(path, userId);
-    }
-
-    protected List<BookingDtoResponse> get(String path, long userId, Map<String, Object> parameters) {
-        return get(path, userId, parameters);
-    }
-
-    protected ItemDto post(String path, ItemDto itemDto, long userId) {
-        return post(path, itemDto, userId);
-    }
-
-    protected ItemDto patch(String path, ItemDto itemDto, long userId) {
-        return patch(path, itemDto, userId);
-    }
-
-    protected ItemDtoWithBooking getItem(String path, long userId) {
-        return getItem(path, userId);
-    }
-
-    protected List<ItemDtoWithBooking> getItem(String path, long userId, Pageable pageable) {
-        return getItem(path, userId, pageable);
-    }
-
-    protected List<ItemDto> getItem(String path, String text, Pageable pageable) {
-        return getItem(path, text, pageable);
-    }
-
-    protected Comment post(String path, long userId) {
-        return post(path, userId);
-    }
-
-    protected ItemRequest post(String path, ItemRequest itemRequest, long userId) {
-        return post(path, itemRequest, userId);
-    }
-
-    protected List<ItemRequestDto> getItemRequest(String path, long userId) {
-        return getItemRequest(path, userId);
-    }
-
-    protected List<ItemRequestDto> get(String path, Pageable pageable, long userId) {
-        return get(path, pageable, userId);
-    }
-
-    protected ItemRequestDto getItemRequestDto(String path, long userId) {
-        return getItemRequestDto(path, userId);
-    }*/
 
 }

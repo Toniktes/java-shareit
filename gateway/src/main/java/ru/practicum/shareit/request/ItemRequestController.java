@@ -6,11 +6,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequest;
-import ru.practicum.shareit.request.dto.ItemRequestDto;
-
 
 import javax.validation.constraints.Min;
-import java.util.List;
 
 
 @Slf4j
@@ -37,19 +34,17 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public ResponseEntity<Object> getRequestsList(@RequestParam(defaultValue = "0") @Min(0) int from,
-                                                @RequestParam(defaultValue = "20") @Min(0) int size,
-                                                @RequestHeader("X-Sharer-User-Id") long userId) {
+                                                  @RequestParam(defaultValue = "20") @Min(0) int size,
+                                                  @RequestHeader("X-Sharer-User-Id") long userId) {
         log.debug("received a request to get getRequestsList");
         return itemRequestClient.getRequestsList(PageRequest.of(from, size), userId);
     }
 
     @GetMapping("/{requestId}")
     public ResponseEntity<Object> getRequestById(@RequestHeader("X-Sharer-User-Id") long userId,
-                                         @PathVariable(value = "requestId") long requestId) {
+                                                 @PathVariable(value = "requestId") long requestId) {
         log.debug("received a request to get getRequestById");
         return itemRequestClient.getRequestById(userId, requestId);
 
     }
-
-
 }
