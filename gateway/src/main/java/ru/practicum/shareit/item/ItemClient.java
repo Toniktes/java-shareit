@@ -46,7 +46,7 @@ public class ItemClient extends BaseClient {
                 "from", pageable.getPageNumber(),
                 "size", pageable.getPageSize()
         );
-        return get("", userId, parameters);
+        return get("?from={from}&size={size}", userId, parameters);
     }
 
     public ResponseEntity<Object> getThingsForSearch(String text, long userId, Pageable pageable) {
