@@ -3,7 +3,6 @@ package ru.practicum.shareit.booking.dto;
 import lombok.*;
 import ru.practicum.shareit.booking.BookingStatus;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Getter
@@ -13,10 +12,9 @@ import java.time.LocalDateTime;
 public class BookingDto {
 
     private long id;
-    LocalDateTime start;
-    LocalDateTime end;
-    long booker;
-    long itemId;
-    @Enumerated(EnumType.STRING)
-    BookingStatus status;
+    private LocalDateTime start;
+    private LocalDateTime end;
+    private long booker;
+    private long itemId;
+    private BookingStatus status;
 }

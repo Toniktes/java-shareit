@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.item.dto.ItemShort;
 
 import java.util.List;
 
@@ -14,6 +13,12 @@ import java.util.List;
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
     ItemShort findByName(String name);
+
+    interface ItemShort {
+        long getId();
+
+        String getName();
+    }
 
     Page<Item> findAllByOwner(long id, Pageable pageable);
 

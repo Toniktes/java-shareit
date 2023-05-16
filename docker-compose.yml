@@ -18,18 +18,18 @@ services:
     ports:
       - "9090:9090"
     depends_on:
-      - db
+      - postgres
     restart: on-failure
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/shareit
       - SPRING_DATASOURCE_USERNAME=toniktes
       - SPRING_DATASOURCE_PASSWORD=password
 
-  db:
+  postgres:
     image: postgres:13.7-alpine
     volumes:
       - /var/lib/postgresql/data/
-    container_name: db
+    container_name: postgres
     ports:
       - "6541:5432"
     environment:

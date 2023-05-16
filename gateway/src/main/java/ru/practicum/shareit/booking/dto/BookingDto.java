@@ -18,11 +18,11 @@ public class BookingDto {
     private long id;
     @FutureOrPresent
     @NotNull
-    LocalDateTime start;
+    private LocalDateTime start;
     @FutureOrPresent
     @NotNull
-    LocalDateTime end;
-    long booker;
-    long itemId;
-    BookingStatus status;
+    private LocalDateTime end;
+    private long booker;
+    private long itemId;
+    private BookingStatus status;
 }
